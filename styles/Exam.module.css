@@ -1,0 +1,400 @@
+.examShell {
+  display: flex;
+  min-height: 100vh;
+  background: #eef2f7;
+  color: #0f172a;
+}
+
+.examMain {
+  flex: 1;
+  padding: 24px 28px;
+  overflow-y: auto;
+}
+
+.mainHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.examTitle {
+  margin: 0 0 6px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.examMeta {
+  margin: 0;
+  color: #475569;
+  font-size: 14px;
+}
+
+.timer {
+  border-radius: 8px;
+  padding: 10px 14px;
+  min-width: 130px;
+  text-align: center;
+  border: 1px solid transparent;
+}
+
+.timerSafe {
+  background: #e8f7ec;
+  border-color: #bde7c9;
+}
+
+.timerDanger {
+  background: #fff1f2;
+  border-color: #fecdd3;
+}
+
+.timerLabel {
+  display: block;
+  font-size: 12px;
+  color: #334155;
+}
+
+.timerValue {
+  display: block;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.progressText {
+  margin: 0 0 16px;
+  color: #475569;
+  font-size: 14px;
+}
+
+.questionCard {
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #dbe2ea;
+  padding: 20px;
+}
+
+.questionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.questionTitle {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.4;
+}
+
+.statusPill {
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.questionImageWrap {
+  margin: 10px 0 16px;
+  text-align: center;
+}
+
+.questionImage {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+  border: 1px solid #d7dce1;
+}
+
+.optionRow {
+  margin-bottom: 10px;
+}
+
+.optionLabel {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.optionSelected {
+  background: #e6f3ff;
+  border-color: #93c5fd;
+}
+
+.optionInput {
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.navRow {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.navButton,
+.reviewButton,
+.submitButton,
+.startButton {
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.navButton {
+  background: #2563eb;
+  color: #fff;
+  padding: 10px 20px;
+}
+
+.navButton:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.reviewButton {
+  background: #f59e0b;
+  color: #111827;
+  padding: 10px 14px;
+}
+
+.reviewActive {
+  background: #f97316;
+  color: #fff;
+}
+
+.submitButton {
+  margin-left: auto;
+  background: #16a34a;
+  color: #fff;
+  padding: 10px 24px;
+}
+
+.submitButton:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.navigator {
+  width: 340px;
+  background: #ffffff;
+  border-left: 1px solid #dbe2ea;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.navigatorTitle {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.statsWrap {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.statBox {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  text-align: center;
+  padding: 10px 6px;
+}
+
+.statBox span {
+  display: block;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.statBox small {
+  font-size: 11px;
+  color: #475569;
+}
+
+.questionGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.qIndexButton {
+  min-height: 40px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.currentQuestion {
+  outline: 2px solid #0f172a;
+  outline-offset: 1px;
+}
+
+.legend {
+  font-size: 13px;
+  color: #334155;
+}
+
+.legend p {
+  margin: 8px 0;
+}
+
+.legendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  margin-right: 8px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.statusAnswered {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.statusReview {
+  background: #f59e0b;
+  color: #111827;
+}
+
+.statusAnsweredReview {
+  background: #8b5cf6;
+  color: #ffffff;
+}
+
+.statusNotAttempted {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.submissionOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.submissionCard {
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #dbe2ea;
+  padding: 28px;
+  text-align: center;
+  min-width: 300px;
+}
+
+.submittedTitle {
+  margin: 0 0 10px;
+  color: #16a34a;
+}
+
+.submittedText {
+  margin: 0 0 10px;
+  color: #334155;
+}
+
+.submittedHint {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.startScreen {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #eef2f7;
+  padding: 20px;
+}
+
+.startCard {
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #dbe2ea;
+  padding: 34px;
+  text-align: center;
+}
+
+.startTitle {
+  margin: 0 0 12px;
+  font-size: 28px;
+}
+
+.startMeta {
+  margin: 0 0 8px;
+  color: #475569;
+  font-size: 16px;
+}
+
+.startNote {
+  margin: 16px 0 20px;
+  color: #64748b;
+  font-size: 14px;
+  font-style: italic;
+}
+
+.startButton {
+  background: #16a34a;
+  color: #fff;
+  font-size: 17px;
+  padding: 12px 28px;
+}
+
+@media (max-width: 1024px) {
+  .examShell {
+    flex-direction: column;
+  }
+
+  .navigator {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #dbe2ea;
+  }
+
+  .questionGrid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .examMain {
+    padding: 14px;
+  }
+
+  .mainHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .questionGrid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .statsWrap {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .submitButton {
+    margin-left: 0;
+  }
+}

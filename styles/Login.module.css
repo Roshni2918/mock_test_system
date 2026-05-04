@@ -1,0 +1,117 @@
+.container {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 8% 12%, #dbeafe 0%, transparent 34%),
+    radial-gradient(circle at 90% 82%, #d6f0ff 0%, transparent 32%),
+    linear-gradient(180deg, #eef3f9 0%, #f6f9fc 100%);
+}
+
+.header {
+  background: linear-gradient(120deg, #0f4c81, #2b75c5);
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  box-shadow: 0 4px 18px rgba(15, 76, 129, 0.2);
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  letter-spacing: 0.02em;
+}
+
+.profile {
+  width: 44px;
+  height: 44px;
+  background:
+    linear-gradient(135deg, #ffffff 0%, #dbeafe 100%),
+    url("https://cdn-icons-png.flaticon.com/512/149/149071.png");
+  background-size: cover;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.75);
+}
+
+.loginBox {
+  width: min(640px, calc(100% - 24px));
+  margin: 64px auto;
+  padding: 34px;
+  background: #ffffff;
+  color: #0f172a;
+  text-align: center;
+  border-radius: 16px;
+  border: 1px solid #d9e4f1;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+}
+
+.loginBox h3 {
+  margin: 0 0 18px;
+  font-size: 1.35rem;
+  color: #0f4c81;
+}
+
+.radioGroup {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 14px 0;
+  font-size: 0.98rem;
+  color: #334155;
+}
+
+.input {
+  width: 100%;
+  padding: 13px 12px;
+  margin: 10px 0;
+  border: 1px solid #cbd9ea;
+  outline: none;
+  border-radius: 10px;
+  font-size: 0.98rem;
+  box-sizing: border-box;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.input:focus {
+  border-color: #2b75c5;
+  box-shadow: 0 0 0 3px rgba(43, 117, 197, 0.14);
+}
+
+.button {
+  width: 100%;
+  padding: 12px 14px;
+  margin-top: 14px;
+  background: linear-gradient(120deg, #0f4c81, #2b75c5);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+  font-size: 0.98rem;
+  font-weight: 700;
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+.button:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 720px) {
+  .header {
+    padding: 12px 14px;
+  }
+
+  .header h2 {
+    font-size: 1rem;
+  }
+
+  .loginBox {
+    margin: 34px auto;
+    padding: 20px 14px;
+  }
+
+  .loginBox h3 {
+    font-size: 1.15rem;
+  }
+}
