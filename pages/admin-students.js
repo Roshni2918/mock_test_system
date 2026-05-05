@@ -4,11 +4,21 @@ import styles from "../styles/Admin.module.css";
 
 export default function AdminStudents() {
   const [students, setStudents] = useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]);
   const [editStudent, setEditStudent] = useState(null);
+  const [examFilter, setExamFilter] = useState("All");
 
   useEffect(() => {
     fetchStudents();
   }, []);
+
+  useEffect(() => {
+    if (examFilter === "All") {
+      setFilteredStudents(students);
+    } else {
+      setFilteredStudents(students.filter(s => s.exam_type === examFilter || (!s.exam_type && examFilter === "Any")));
+    }
+  }, [examFilter, students]);
 
   const fetchStudents = async () => {
     try {
@@ -91,6 +101,27 @@ export default function AdminStudents() {
 
   return (
     <AdminLayout activePage="Manage Students">
+      <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <label style={{ fontWeight: 'bold' }}>Filter by Exam Type:</label>
+        <select 
+          value={examFilter} 
+          onChange={(e) => setExamFilter(e.target.value)}
+          style={{ padding: '8px 12px', borderRadius: '4px', border: '1px solid #ddd' }}
+        >
+          <option value="All">All Students</option>
+          <option value="JEE">JEE</option>
+          <option value="NEET">NEET</option>
+          <option value="NDA">NDA</option>
+          <option value="UPSC">UPSC</option>
+          <option value="Mock Test">Mock Test</option>
+          <option value="Practice Test">Practice Test</option>
+          <option value="Other">Other</option>
+          <option value="Any">Not Specified (Any)</option>
+        </select>
+        <span style={{ color: '#666', fontSize: '14px' }}>
+          Showing {filteredStudents.length} of {students.length} students
+        </span>
+      </div>
       <table className={styles.table}>
         <thead>
           <tr>
@@ -102,8 +133,8 @@ export default function AdminStudents() {
           </tr>
         </thead>
         <tbody>
-          {students.length > 0 ? (
-            students.map((student) => (
+          {filteredStudents.length > 0 ? (
+            filteredStudents.map((student) => (
               <tr key={student.id}>
                 <td>{student.name}</td>
                 <td>{student.email}</td>
@@ -117,7 +148,9 @@ export default function AdminStudents() {
             ))
           ) : (
             <tr>
-              <td colSpan="5">No students found</td>
+              <td colSpan="5">
+                {examFilter === "All" ? "No students found" : `No students with exam type "${examFilter}"`}
+              </td>
             </tr>
           )}
         </tbody>
