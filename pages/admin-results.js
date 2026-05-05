@@ -7,10 +7,13 @@ export default function AdminResults() {
   const [allResults, setAllResults] = useState([]);
   const [exams, setExams] = useState([]);
   const [selectedExam, setSelectedExam] = useState("");
+  const [selectedExamType, setSelectedExamType] = useState("");
   const [filteredResults, setFilteredResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedResultDetails, setSelectedResultDetails] = useState(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
+
+  const examTypes = ["JEE", "NEET", "NDA", "UPSC", "Mock Test", "Practice Test", "Other"];
 
   useEffect(() => {
     fetchAllResults();
@@ -68,12 +71,27 @@ export default function AdminResults() {
   const handleExamFilter = (e) => {
     const examId = e.target.value;
     setSelectedExam(examId);
+    applyFilters(examId, selectedExamType);
+  };
+
+  const handleExamTypeFilter = (e) => {
+    const examType = e.target.value;
+    setSelectedExamType(examType);
+    applyFilters(selectedExam, examType);
+  };
+
+  const applyFilters = (examId, examType) => {
+    let filtered = allResults;
 
     if (examId) {
-      setFilteredResults(allResults.filter(r => r.exam_id === parseInt(examId)));
-    } else {
-      setFilteredResults(allResults);
+      filtered = filtered.filter(r => r.exam_id === parseInt(examId));
     }
+
+    if (examType) {
+      filtered = filtered.filter(r => r.exam_type === examType);
+    }
+
+    setFilteredResults(filtered);
   };
 
   const calculateStats = () => {
@@ -116,10 +134,10 @@ export default function AdminResults() {
           <h3>Exam Results Dashboard</h3>
 
         {/* FILTER */}
-        <div className={styles.card} style={{ marginBottom: "20px" }}>
-          <label>
-            Filter by Exam:{" "}
-            <select value={selectedExam} onChange={handleExamFilter}>
+        <div className={styles.card} style={{ marginBottom: "20px", display: "flex", gap: "20px", flexWrap: "wrap" }}>
+          <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span>Filter by Exam:</span>
+            <select value={selectedExam} onChange={handleExamFilter} style={{ padding: "6px 10px", borderRadius: "4px" }}>
               <option value="">All Exams</option>
               {exams.map(exam => (
                 <option key={exam.id} value={exam.id}>
@@ -128,6 +146,20 @@ export default function AdminResults() {
               ))}
             </select>
           </label>
+
+          <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span>Filter by Exam Type:</span>
+            <select value={selectedExamType} onChange={handleExamTypeFilter} style={{ padding: "6px 10px", borderRadius: "4px" }}>
+              <option value="">All Types</option>
+              {examTypes.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </label>
+
+          <span style={{ color: "#666", fontSize: "14px", marginLeft: "auto" }}>
+            Showing {filteredResults.length} of {allResults.length} results
+          </span>
         </div>
 
         {/* STATISTICS */}
@@ -167,6 +199,7 @@ export default function AdminResults() {
               <tr>
                 <th>Student Name</th>
                 <th>Exam Name</th>
+                <th>Exam Type</th>
                 <th>Score</th>
                 <th>Time Taken (min)</th>
                 <th>Status</th>
@@ -179,6 +212,7 @@ export default function AdminResults() {
                 <tr key={result.id}>
                   <td>{result.student_name}</td>
                   <td>{result.exam_name}</td>
+                  <td>{result.exam_type || '-'}</td>
                   <td style={{ fontWeight: "bold", color: result.score >= 5 ? "#28a745" : "#dc3545" }}>
                     {result.score}
                   </td>
@@ -209,7 +243,23 @@ export default function AdminResults() {
           </table>
         ) : (
           <div style={{ padding: "20px", textAlign: "center", color: "#666" }}>
-            No results found
+            {selectedExam || selectedExamType ? (
+              <div>
+                <div>No results match your filters</div>
+                <div style={{ fontSize: "14px", marginTop: "8px" }}>
+                  {selectedExam && `Exam: ${exams.find(e => e.id === parseInt(selectedExam))?.name || 'Selected'} `}
+                  {selectedExamType && `Type: ${selectedExamType}`}
+                </div>
+                <button 
+                  onClick={() => { setSelectedExam(""); setSelectedExamType(""); setFilteredResults(allResults); }}
+                  style={{ marginTop: "12px", padding: "8px 16px", cursor: "pointer" }}
+                >
+                  Clear Filters
+                </button>
+              </div>
+            ) : (
+              "No results found"
+            )}
           </div>
         )}
 
