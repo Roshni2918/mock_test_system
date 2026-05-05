@@ -10,7 +10,7 @@ async function handler(req, res) {
     const { db } = await connectToDatabase();
     const students = await db.collection('users')
       .find({ role: 'student' })
-      .project({ name: 1, email: 1, batch: 1, roll_no: 1, created_at: 1 })
+      .project({ name: 1, email: 1, batch: 1, exam_type: 1, roll_no: 1, created_at: 1 })
       .sort({ created_at: -1 })
       .toArray();
 
