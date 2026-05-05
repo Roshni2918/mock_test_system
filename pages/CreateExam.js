@@ -20,7 +20,7 @@ export default function CreateExam() {
       const token = localStorage.getItem('token');
       
       // Fixed: Send correct field names matching backend API
-      const response = await fetch("http://localhost:5000/api/exams/add", {
+      const response = await fetch("/api/exams/add", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -121,3 +121,30 @@ export default function CreateExam() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

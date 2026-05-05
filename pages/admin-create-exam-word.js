@@ -73,7 +73,7 @@ export default function AdminCreateExamWord() {
       formData.append("batch", exam.batch);
       formData.append("duration", exam.duration);
 
-      const response = await fetch("http://localhost:5000/api/exams/upload-word-exam", {
+      const response = await fetch("/api/exams/upload-word-exam", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,

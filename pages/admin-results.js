@@ -32,7 +32,7 @@ export default function AdminResults() {
   const fetchAllResults = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch("http://localhost:5000/api/admin/results", {
+      const res = await fetch("/api/admin/results", {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await parseResponseSafely(res);
@@ -52,7 +52,7 @@ export default function AdminResults() {
   const fetchExams = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch("http://localhost:5000/api/admin/exams", {
+      const res = await fetch("/api/admin/exams", {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await parseResponseSafely(res);
@@ -91,7 +91,7 @@ export default function AdminResults() {
     setDetailsLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:5000/api/admin/results/${resultId}/details`, {
+      const res = await fetch(`/api/admin/results/${resultId}/details`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await parseResponseSafely(res);

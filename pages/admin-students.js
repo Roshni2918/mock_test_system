@@ -13,7 +13,7 @@ export default function AdminStudents() {
   const fetchStudents = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/api/students", {
+      const res = await fetch("/api/students", {
         headers: { Authorization: `Bearer ${token}` }
       });
       const responseText = await res.text();
@@ -32,7 +32,7 @@ export default function AdminStudents() {
     if (!window.confirm("Delete this student?")) return;
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/api/students/delete/${id}`, { 
+      const res = await fetch(`/api/students/delete/${id}`, { 
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -67,7 +67,7 @@ export default function AdminStudents() {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/api/students/update/${id}`, {
+      const res = await fetch(`/api/students/update/${id}`, {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json",

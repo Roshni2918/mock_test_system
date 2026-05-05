@@ -78,7 +78,7 @@ export default function AdminUploadExam() {
       formData.append("duration", exam.duration);
       formData.append("scheduled_date", exam.scheduled_date);
 
-      const response = await fetch("http://localhost:5000/api/exams/upload-word-exam", {
+      const response = await fetch("/api/exams/upload-word-exam", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,

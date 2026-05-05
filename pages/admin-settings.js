@@ -23,7 +23,7 @@ export default function AdminSettings() {
   const fetchExams = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/admin/exams", {
+      const response = await fetch("/api/admin/exams", {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
@@ -89,7 +89,7 @@ export default function AdminSettings() {
     setMessage("");
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:5000/api/admin/exams/${examId}`, {
+      const response = await fetch(`/api/admin/exams/${examId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

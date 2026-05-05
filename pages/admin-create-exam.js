@@ -87,7 +87,7 @@ export default function AdminCreateExam() {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/admin/create-exam", {
+      const response = await fetch("/api/admin/create-exam", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
