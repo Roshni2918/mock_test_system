@@ -1,5 +1,4 @@
-[00:18:26.758] Server  ERROR   ⨯ Error: ENOENT: no such file or directory, open 'C:\offline-mock-test-system\.next\dev\server\pages\api\test\pages-manifest.json'
-[00:18:27.180] Server  ERROR   ⨯ Error: ENOENT: no such file or directory, open 'C:\offline-mock-test-system\.next\dev\server\pages\_app\build-manifest.json'
-[00:18:27.323] Server  ERROR   Error: ENOENT: no such file or directory, open 'C:\offline-mock-test-system\.next\dev\server\pages\api\test\pages-manifest.json'
-[00:18:27.411] Server  ERROR   ⨯ Error: ENOENT: no such file or directory, open 'C:\offline-mock-test-system\.next\dev\server\pages\_app\build-manifest.json'
-[00:18:27.496] Server  ERROR   Error: ENOENT: no such file or directory, open 'C:\offline-mock-test-system\.next\dev\server\pages\_app\build-manifest.json'
+[00:00:04.537] Server  LOG     ✓ Ready in 3.1s
+[00:00:13.717] Server  ERROR   MongoDB Connection Error: Error: querySrv ECONNREFUSED _mongodb._tcp.cluster0.8sepz3g.mongodb.net
+[00:00:27.822] Server  ERROR   Login error: Error: querySrv ECONNREFUSED _mongodb._tcp.cluster0.8sepz3g.mongodb.net
+[00:00:31.142] Server  ERROR   Login error: Error: querySrv ECONNREFUSED _mongodb._tcp.cluster0.8sepz3g.mongodb.net
