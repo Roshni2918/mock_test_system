@@ -2,8 +2,31 @@ import { connectToDatabase } from '../../lib/mongodb';
 import bcrypt from 'bcryptjs';
 
 async function handler(req, res) {
+  // GET: Check current data count
+  if (req.method === 'GET') {
+    try {
+      const { db } = await connectToDatabase();
+      const students = await db.collection('users').countDocuments({ role: 'student' });
+      const exams = await db.collection('exams').countDocuments();
+      const results = await db.collection('results').countDocuments();
+
+      return res.status(200).json({
+        message: 'Database status',
+        currentData: {
+          students,
+          exams,
+          results
+        },
+        instruction: 'Send POST request to add sample data'
+      });
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  // POST: Add sample data
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
+    return res.status(405).json({ message: 'Method not allowed. Use GET to check status or POST to seed data.' });
   }
 
   try {
