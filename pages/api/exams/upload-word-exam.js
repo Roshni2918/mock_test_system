@@ -2,9 +2,9 @@ import { connectToDatabase } from '../../../lib/mongodb';
 import { requireAdmin } from '../../../lib/auth';
 import multer from 'multer';
 import mammoth from 'mammoth';
-import fs from 'fs';
 
-const upload = multer({ dest: 'uploads/' });
+// Use memory storage for Vercel serverless compatibility
+const upload = multer({ storage: multer.memoryStorage() });
 
 export const config = {
   api: {
@@ -168,9 +168,6 @@ async function handler(req, res) {
       { _id: examId },
       { $set: { total_questions: totalQuestions } }
     );
-
-    // Delete uploaded file
-    fs.unlinkSync(file.path);
 
     res.status(200).json({
       message: 'Exam uploaded successfully',
