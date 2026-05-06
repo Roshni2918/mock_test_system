@@ -158,6 +158,13 @@ export default function AdminSettings() {
                     >
                       <option value="JEE">JEE</option>
                       <option value="NEET">NEET</option>
+                      <option value="NDA">NDA</option>
+                      <option value="UPSC">UPSC</option>
+                      <option value="SSC">SSC</option>
+                      <option value="Police Constable">Police Constable</option>
+                      <option value="Mock Test">Mock Test</option>
+                      <option value="Practice Test">Practice Test</option>
+                      <option value="Other">Other</option>
                     </select>
                   ) : exam.type}
                 </td>
