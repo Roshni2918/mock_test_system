@@ -17,25 +17,53 @@ async function handler(req, res) {
   try {
     const { db } = await connectToDatabase();
 
+    // Convert examId to ObjectId (handle both string and integer)
+    let examObjectId;
+    try {
+      examObjectId = new ObjectId(examId.toString());
+    } catch (e) {
+      return res.status(400).json({ message: 'Invalid exam ID format' });
+    }
+
     // Check if already submitted
     const existing = await db.collection('student_exams').findOne({
       student_id: new ObjectId(user.id),
-      exam_id: new ObjectId(examId)
+      exam_id: examObjectId
     });
 
     if (existing) {
       return res.status(400).json({ message: 'Exam already submitted' });
     }
 
-    // Check if exam exists and student has access
+    // Check if exam exists
     const exam = await db.collection('exams').findOne({
-      _id: new ObjectId(examId),
-      batch: user.batch,
-      type: user.exam_type
+      _id: examObjectId
     });
 
     if (!exam) {
-      return res.status(403).json({ message: 'Access denied' });
+      return res.status(404).json({ message: 'Exam not found' });
+    }
+
+    // Check student access - student must have matching batch OR exam_type
+    const studentBatch = user.batch;
+    const studentExamType = user.exam_type;
+    const examBatch = exam.batch;
+    const examType = exam.type;
+
+    // Allow access if batch matches OR exam_type matches
+    const hasBatchMatch = studentBatch && examBatch && studentBatch.toString() === examBatch.toString();
+    const hasTypeMatch = studentExamType && examType && studentExamType.toString() === examType.toString();
+
+    if (!hasBatchMatch && !hasTypeMatch) {
+      return res.status(403).json({ 
+        message: 'Access denied. Your batch or exam type does not match this exam.',
+        details: {
+          yourBatch: studentBatch,
+          yourExamType: studentExamType,
+          examBatch: examBatch,
+          examType: examType
+        }
+      });
     }
 
     const currentTime = new Date();
@@ -56,7 +84,7 @@ async function handler(req, res) {
     // Create submission
     await db.collection('student_exams').insertOne({
       student_id: new ObjectId(user.id),
-      exam_id: new ObjectId(examId),
+      exam_id: examObjectId,
       score,
       answers,
       time_taken: time_taken || 0,
