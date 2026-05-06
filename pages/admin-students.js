@@ -129,6 +129,7 @@ export default function AdminStudents() {
             <th>Email</th>
             <th>Batch</th>
             <th>Exam Type</th>
+            <th>Mobile</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -138,8 +139,9 @@ export default function AdminStudents() {
               <tr key={student.id}>
                 <td>{student.name}</td>
                 <td>{student.email}</td>
-                <td>{student.batch}</td>
-                <td>{student.exam_type || 'Any'}</td>
+                <td>{student.batch || '-'}</td>
+                <td>{student.exam_type || '-'}</td>
+                <td>{student.mobile_no || '-'}</td>
                 <td>
                   <button onClick={() => setEditStudent(student)}>Edit</button>
                   <button onClick={() => deleteStudent(student.id)}>Delete</button>
@@ -148,7 +150,7 @@ export default function AdminStudents() {
             ))
           ) : (
             <tr>
-              <td colSpan="5">
+              <td colSpan="6">
                 {examFilter === "All" ? "No students found" : `No students with exam type "${examFilter}"`}
               </td>
             </tr>
