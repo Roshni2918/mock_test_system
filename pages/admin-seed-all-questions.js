@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import AdminLayout from "../components/AdminLayout";
 import ProtectedRoute from "../components/ProtectedRoute";
 import styles from "../styles/Admin.module.css";
+// Deploy: All questions migration from MySQL
 
 export default function AdminSeedAllQuestions() {
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Version 1.1 - Force rebuild
   const seedAllQuestions = async () => {
     if (!window.confirm("⚠️ This will migrate ALL questions from MySQL:\n\n" +
       "• ALL 100+ questions\n" +

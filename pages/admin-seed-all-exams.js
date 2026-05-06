@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import AdminLayout from "../components/AdminLayout";
 import ProtectedRoute from "../components/ProtectedRoute";
 import styles from "../styles/Admin.module.css";
-// Deploy: All 78 exams migration page
+// Deploy: All 78 exams migration from MySQL
 
 export default function AdminSeedAllExams() {
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Version 1.1 - Force rebuild
   const seedAllExams = async () => {
     if (!window.confirm("⚠️ This will migrate ALL 78 exams from MySQL:\n\n" +
       "• JEE Exams\n" +
