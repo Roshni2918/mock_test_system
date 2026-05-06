@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import AdminLayout from "../components/AdminLayout";
 import ProtectedRoute from "../components/ProtectedRoute";
 import styles from "../styles/Admin.module.css";
+// Deploy: All 78 exams migration page
 
 export default function AdminSeedAllExams() {
   const [status, setStatus] = useState(null);
