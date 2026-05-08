@@ -108,13 +108,11 @@ async function handler(req, res) {
     const { name, type, batch, duration, scheduled_date } = req.body;
 
     if (!name || !type || !batch || !duration || !scheduled_date) {
-      fs.unlinkSync(file.path);
       return res.status(400).json({ message: 'Please fill all required fields' });
     }
 
-    // Parse Word file
-    const buffer = fs.readFileSync(file.path);
-    const result = await mammoth.extractRawText({ buffer });
+    // Parse Word file from memory buffer
+    const result = await mammoth.extractRawText({ buffer: file.buffer });
     const sections = parseWordContent(result.value);
 
     const { db } = await connectToDatabase();
