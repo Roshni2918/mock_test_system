@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../components/AdminLayout";
+import ProtectedRoute from "../components/ProtectedRoute";
 import styles from "../styles/Admin.module.css";
 
 export default function AdminStudents() {
@@ -100,7 +101,8 @@ export default function AdminStudents() {
   };
 
   return (
-    <AdminLayout activePage="Manage Students">
+    <ProtectedRoute allowedRoles={["admin"]}>
+      <AdminLayout activePage="Manage Students">
       <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
         <label style={{ fontWeight: 'bold' }}>Filter by Exam Type:</label>
         <select 
@@ -192,6 +194,7 @@ export default function AdminStudents() {
           </div>
         </div>
       )}
-    </AdminLayout>
+      </AdminLayout>
+    </ProtectedRoute>
   );
 }
