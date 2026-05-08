@@ -2,5 +2,11 @@
   "version": 2,
   "buildCommand": "next build",
   "outputDirectory": ".next",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "routes": [
+    { "src": "/admin-migrate-all", "dest": "/admin-migrate-all" },
+    { "src": "/admin-seed-all-users", "dest": "/admin-seed-all-users" },
+    { "src": "/admin-seed-all-exams", "dest": "/admin-seed-all-exams" },
+    { "src": "/admin-seed-all-questions", "dest": "/admin-seed-all-questions" }
+  ]
 }

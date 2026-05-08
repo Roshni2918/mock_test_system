@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-// Force rebuild - version 1.2
+// Deploy v1.3 - Force rebuild all pages
 const nextConfig = {
   reactStrictMode: true,
   images: {
