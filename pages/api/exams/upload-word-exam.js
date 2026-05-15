@@ -113,7 +113,10 @@ async function handler(req, res) {
 
     // Parse Word file from memory buffer
     const result = await mammoth.extractRawText({ buffer: file.buffer });
+    console.log('Word content length:', result.value.length);
     const sections = parseWordContent(result.value);
+    console.log('Parsed sections:', sections.length);
+    console.log('Total questions in sections:', sections.reduce((sum, s) => sum + s.questions.length, 0));
 
     const { db } = await connectToDatabase();
 
@@ -133,8 +136,12 @@ async function handler(req, res) {
 
     // Add questions
     for (const section of sections) {
+      console.log(`Processing section: ${section.name}, questions: ${section.questions.length}`);
       for (const q of section.questions) {
-        if (!q.text || q.options.length < 2) continue;
+        if (!q.text || q.options.length < 2) {
+          console.log('Skipping question - no text or less than 2 options');
+          continue;
+        }
 
         const questionResult = await db.collection('questions').insertOne({
           exam_id: examId,
@@ -160,6 +167,8 @@ async function handler(req, res) {
         totalQuestions++;
       }
     }
+    
+    console.log('Total questions inserted:', totalQuestions);
 
     // Update exam with question count
     await db.collection('exams').updateOne(
