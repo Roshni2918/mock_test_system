@@ -28,6 +28,7 @@ function parseWordContent(content) {
   const sections = [];
   let currentSection = null;
   let currentQuestion = null;
+  let questionNumber = 1;
 
   for (const line of lines) {
     // Detect section header
@@ -48,8 +49,9 @@ function parseWordContent(content) {
       continue;
     }
 
-    // Detect question - supports multiple formats
-    const questionMatch = line.match(/^Q?(\d+)[\.\)]\s*(.+)/i);
+    // Detect question - MORE FLEXIBLE formats
+    // Supports: 1., 1), Q1., Q1), 1:, Question 1, etc.
+    const questionMatch = line.match(/^(?:Q(?:uestion)?\s*)?(\d+)[\.\):]\s*(.+)/i);
     if (questionMatch) {
       if (currentQuestion) {
         if (!currentSection) {
@@ -63,23 +65,43 @@ function parseWordContent(content) {
         text: questionMatch[2],
         options: []
       };
+      questionNumber = parseInt(questionMatch[1]) + 1;
       continue;
     }
 
-    // Detect option - supports A), B), C), D) or A., B., C., D.
-    const optionMatch = line.match(/^([A-D])[\.\)]\s*(.+)/i);
+    // Detect option - MORE FLEXIBLE formats
+    // Supports: A), B), C), D), A., B., C., D., (A), (B), (C), (D), a), b), c), d)
+    const optionMatch = line.match(/^(\(?[A-Da-d]\)?[\.\)]?\s*)\s*(.+)/i);
     if (optionMatch && currentQuestion) {
-      currentQuestion.options.push({
-        letter: optionMatch[1].toUpperCase(),
-        text: optionMatch[2]
-      });
+      const letter = optionMatch[1].replace(/[\(\)\.\)]/g, '').toUpperCase();
+      if (letter.match(/^[A-D]$/)) {
+        currentQuestion.options.push({
+          letter: letter,
+          text: optionMatch[2]
+        });
+      }
       continue;
     }
 
-    // Detect answer - supports "Answer: A", "Ans: A", "Answer: A)" formats
-    const answerMatch = line.match(/^(?:ANSWER|ANS):?\s*([A-D])/i);
+    // Detect answer - MORE FLEXIBLE formats
+    // Supports: Answer: A, Ans: A, Answer: A), Correct: A, Solution: A, etc.
+    const answerMatch = line.match(/^(?:ANSWER|ANS|CORRECT|SOLUTION):?\s*[\(\)]?\s*([A-D])/i);
     if (answerMatch && currentQuestion) {
       currentQuestion.answer = answerMatch[1].toUpperCase();
+    }
+
+    // If line looks like a question (starts with number but no option format)
+    // and we're not in a question, treat it as a question
+    if (!currentQuestion && !optionMatch && line.match(/^\d+\./)) {
+      const parts = line.split('.');
+      if (parts.length > 1) {
+        currentQuestion = {
+          number: parseInt(parts[0]),
+          text: parts.slice(1).join('.').trim(),
+          options: []
+        };
+        continue;
+      }
     }
   }
 
@@ -89,6 +111,65 @@ function parseWordContent(content) {
       currentSection = { name: 'General', questions: [] };
       sections.push(currentSection);
     }
+    currentSection.questions.push(currentQuestion);
+  }
+
+  // If no questions found, try alternative parsing
+  if (sections.length === 0 || sections.every(s => s.questions.length === 0)) {
+    console.log('Primary parsing failed, trying alternative...');
+    return parseWordContentAlternative(content);
+  }
+
+  return sections;
+}
+
+function parseWordContentAlternative(content) {
+  const lines = content.split('\n').map(l => l.trim()).filter(l => l);
+  const sections = [];
+  let currentSection = { name: 'General', questions: [] };
+  sections.push(currentSection);
+  let currentQuestion = null;
+
+  for (const line of lines) {
+    // Very lenient question detection - any line that starts with a number
+    const numberMatch = line.match(/^(\d+)[\.\)\s]+(.+)/);
+    if (numberMatch && !currentQuestion) {
+      currentQuestion = {
+        number: parseInt(numberMatch[1]),
+        text: numberMatch[2],
+        options: []
+      };
+      continue;
+    }
+
+    // Very lenient option detection - any line starting with a letter
+    const letterMatch = line.match(/^([A-Da-d])[\.\)\s]+(.+)/);
+    if (letterMatch && currentQuestion) {
+      currentQuestion.options.push({
+        letter: letterMatch[1].toUpperCase(),
+        text: letterMatch[2]
+      });
+      continue;
+    }
+
+    // If we have a question and the line doesn't look like an option, append to question text
+    if (currentQuestion && !letterMatch && !numberMatch) {
+      currentQuestion.text += ' ' + line;
+      continue;
+    }
+
+    // If we have options and the next line is a number, save current question
+    if (currentQuestion && currentQuestion.options.length > 0 && numberMatch) {
+      currentSection.questions.push(currentQuestion);
+      currentQuestion = {
+        number: parseInt(numberMatch[1]),
+        text: numberMatch[2],
+        options: []
+      };
+    }
+  }
+
+  if (currentQuestion) {
     currentSection.questions.push(currentQuestion);
   }
 
