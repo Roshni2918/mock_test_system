@@ -29,25 +29,33 @@ async function handler(req, res) {
 
     // Add questions if provided
     let inserted = 0;
+    console.log('Questions received:', JSON.stringify(questions));
     if (Array.isArray(questions)) {
-      for (const q of questions) {
+      for (const [idx, q] of questions.entries()) {
+        console.log(`Question ${idx}:`, JSON.stringify(q));
         if (!q.question_text || !Array.isArray(q.options) || q.options.length !== 4) {
+          console.log(`Skipping question ${idx} - invalid format`);
           continue;
         }
 
         const questionResult = await db.collection('questions').insertOne({
           exam_id: examId,
           section_name: q.section || null,
-          question_text: q.question_text,
+          question_text: q.question_text.trim(),
           created_at: new Date()
         });
 
         const questionId = questionResult.insertedId;
 
         for (let i = 0; i < q.options.length; i++) {
+          const optText = q.options[i]?.trim();
+          if (!optText) {
+            console.log(`Skipping empty option ${i} for question ${idx}`);
+            continue;
+          }
           await db.collection('options').insertOne({
             question_id: questionId,
-            option_text: q.options[i],
+            option_text: optText,
             is_correct: parseInt(q.correctOption, 10) === i,
             created_at: new Date()
           });
@@ -55,6 +63,7 @@ async function handler(req, res) {
         inserted++;
       }
     }
+    console.log(`Total questions inserted: ${inserted}`);
 
     // Update exam with question count
     await db.collection('exams').updateOne(
