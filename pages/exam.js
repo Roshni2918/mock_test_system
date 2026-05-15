@@ -150,9 +150,8 @@ export default function ExamPage() {
     try {
       const token = localStorage.getItem('token');
       
-      // Ensure examId is a number and answers is properly formatted
       const submissionData = {
-        examId: parseInt(examId, 10),
+        examId: examId,
         answers: answers || {},
         time_taken: totalTime
       };

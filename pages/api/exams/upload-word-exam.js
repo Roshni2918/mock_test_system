@@ -139,7 +139,155 @@ function parseWordContent(content) {
   // If no questions found, try alternative parsing
   if (sections.length === 0 || sections.every(s => s.questions.length === 0)) {
     console.log('Primary parsing failed, trying alternative...');
-    return parseWordContentAlternative(content);
+    const altResult = parseWordContentAlternative(content);
+    if (altResult.length > 0 && altResult.some(s => s.questions.length > 0)) {
+      return altResult;
+    }
+    console.log('Alternative also failed, trying fallback line-by-line parser...');
+    return parseWordContentFallback(content);
+  }
+
+  return sections;
+}
+
+function parseWordContentFallback(content) {
+  const lines = content.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const sections = [];
+  let currentSection = { name: 'General', questions: [] };
+  sections.push(currentSection);
+  let currentQuestion = null;
+  let buffer = [];
+
+  for (const line of lines) {
+    // Skip very short or common non-question lines
+    if (line.length < 3 || /^(page|http|www|```)/i.test(line)) continue;
+
+    // Check if line is a section header
+    if (/^(section|topic|chapter|unit|part)\s*[-:]/i.test(line)) {
+      if (currentQuestion) { pushQuestion(); }
+      currentSection = { name: line.replace(/^(section|topic|chapter|unit|part)\s*[-:]\s*/i, '').trim(), questions: [] };
+      sections.push(currentSection);
+      continue;
+    }
+
+    // Check for answer line
+    const ansMatch = line.match(/^(?:answer|ans|correct|solution|key)\s*[:=]?\s*\(?([A-Da-d1-4])\)?/i);
+    if (ansMatch && currentQuestion) {
+      currentQuestion.answer = ansMatch[1].toUpperCase();
+      continue;
+    }
+
+    // Check for option line - letter based
+    const optLetterMatch = line.match(/^\(?([A-Da-d])\)?[\.\)\s]+\s*(.+)/);
+    if (optLetterMatch && currentQuestion) {
+      currentQuestion.options.push({
+        letter: optLetterMatch[1].toUpperCase(),
+        text: optLetterMatch[2]
+      });
+      continue;
+    }
+
+    // Check for option line - number based (1-4)
+    const optNumMatch = line.match(/^\(?([1-4])\)?[\.\)\s]+\s*(.+)/);
+    if (optNumMatch && currentQuestion) {
+      const letterMap = { '1': 'A', '2': 'B', '3': 'C', '4': 'D' };
+      currentQuestion.options.push({
+        letter: letterMap[optNumMatch[1]],
+        text: optNumMatch[2]
+      });
+      continue;
+    }
+
+    // If it looks like a numbered question start
+    const qNumMatch = line.match(/^\(?(\d+)\)?[\.\)]\s*(.+)/);
+    if (qNumMatch) {
+      if (currentQuestion && currentQuestion.options.length > 0) {
+        pushQuestion();
+      }
+      currentQuestion = {
+        number: parseInt(qNumMatch[1]),
+        text: qNumMatch[2],
+        options: []
+      };
+      continue;
+    }
+
+    // If we have no current question and this line is long enough, treat as first question
+    if (!currentQuestion && line.length > 10) {
+      currentQuestion = {
+        number: 1,
+        text: line,
+        options: []
+      };
+      continue;
+    }
+
+    // If we have a question but no options yet, append to question text
+    if (currentQuestion && currentQuestion.options.length === 0) {
+      currentQuestion.text += ' ' + line;
+      continue;
+    }
+  }
+
+  function pushQuestion() {
+    if (currentQuestion && currentQuestion.text && currentQuestion.options.length > 0) {
+      currentSection.questions.push(currentQuestion);
+    }
+    currentQuestion = null;
+  }
+
+  pushQuestion();
+
+  // If still no questions, use every line as potential question
+  if (sections.every(s => s.questions.length === 0)) {
+    console.log('Fallback parser also failed, trying last-resort paragraph parser...');
+    return parseWordContentLastResort(content);
+  }
+
+  return sections;
+}
+
+function parseWordContentLastResort(content) {
+  const paragraphs = content.split('\n\n').filter(p => p.trim().length > 20);
+  const sections = [];
+  let currentSection = { name: 'General', questions: [] };
+  sections.push(currentSection);
+  let questionIdx = 0;
+
+  for (const para of paragraphs) {
+    const lines = para.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    if (lines.length < 2) continue;
+
+    const options = [];
+    let questionText = '';
+    let answer = '';
+
+    for (const line of lines) {
+      const optMatch = line.match(/^\(?([A-Da-d1-4])\)?[\.\)\s]+\s*(.+)/);
+      if (optMatch) {
+        options.push({ letter: optMatch[1].toUpperCase(), text: optMatch[2] });
+        continue;
+      }
+      const ansMatch = line.match(/^(?:answer|ans|correct)[\s:=]+\(?([A-Da-d1-4])\)?/i);
+      if (ansMatch) {
+        answer = ansMatch[1].toUpperCase();
+        continue;
+      }
+      questionText += (questionText ? ' ' : '') + line;
+    }
+
+    if (questionText && options.length >= 2) {
+      questionIdx++;
+      currentSection.questions.push({
+        number: questionIdx,
+        text: questionText.replace(/^\d+[\.\)]\s*/, '').trim(),
+        options: options.map(o => ({
+          letter: o.letter.replace(/[^A-D]/g, ''),
+          text: o.text
+        })),
+        answer: answer || 'A'
+      });
+    }
   }
 
   return sections;
