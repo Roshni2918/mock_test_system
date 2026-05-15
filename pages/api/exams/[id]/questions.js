@@ -13,11 +13,13 @@ async function handler(req, res) {
   try {
     const { db } = await connectToDatabase();
 
-    // Check if student can access this exam
+    // Check if student can access this exam (batch OR type must match)
     const exam = await db.collection('exams').findOne({
       _id: new ObjectId(examId),
-      batch: user.batch,
-      type: user.exam_type
+      $or: [
+        { batch: user.batch },
+        { type: user.exam_type }
+      ]
     });
 
     if (!exam) {
