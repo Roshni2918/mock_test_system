@@ -22,7 +22,8 @@ async function handler(req, res) {
     try {
       examObjectId = new ObjectId(examId.toString());
     } catch (e) {
-      return res.status(400).json({ message: 'Invalid exam ID format' });
+      console.error('Invalid exam ID:', examId);
+      return res.status(400).json({ message: 'Invalid exam ID format', examId: examId.toString() });
     }
 
     // Check if already submitted

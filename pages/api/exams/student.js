@@ -22,8 +22,14 @@ async function handler(req, res) {
   try {
     const { db } = await connectToDatabase();
 
+    // Filter exams by batch OR type (allow access if either matches)
     const exams = await db.collection('exams')
-      .find({ batch: user.batch, type: user.exam_type })
+      .find({
+        $or: [
+          { batch: user.batch },
+          { type: user.exam_type }
+        ]
+      })
       .sort({ created_at: -1 })
       .toArray();
 

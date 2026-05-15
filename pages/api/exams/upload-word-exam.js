@@ -180,6 +180,4 @@ async function handler(req, res) {
   }
 }
 
-// Temporarily disable auth for testing - remove after fixing
-// export default requireAdmin(handler);
-export default handler;
+export default requireAdmin(handler);
