@@ -71,7 +71,10 @@ function parseWordContent(content) {
 
     // Detect option - MORE FLEXIBLE formats
     // Supports: A), B), C), D), A., B., C., D., (A), (B), (C), (D), a), b), c), d)
+    // Also supports numeric options: 1), 2), 3), 4), 1., 2., 3., 4.
     const optionMatch = line.match(/^(\(?[A-Da-d]\)?[\.\)]?\s*)\s*(.+)/i);
+    const numericOptionMatch = line.match(/^([1-4])[\)\.\s]+(.+)/);
+    
     if (optionMatch && currentQuestion) {
       const letter = optionMatch[1].replace(/[\(\)\.\)]/g, '').toUpperCase();
       if (letter.match(/^[A-D]$/)) {
@@ -82,12 +85,31 @@ function parseWordContent(content) {
       }
       continue;
     }
+    
+    if (numericOptionMatch && currentQuestion) {
+      // Convert numeric option to letter (1->A, 2->B, 3->C, 4->D)
+      const letterMap = { '1': 'A', '2': 'B', '3': 'C', '4': 'D' };
+      currentQuestion.options.push({
+        letter: letterMap[numericOptionMatch[1]],
+        text: numericOptionMatch[2]
+      });
+      continue;
+    }
 
     // Detect answer - MORE FLEXIBLE formats
     // Supports: Answer: A, Ans: A, Answer: A), Correct: A, Solution: A, etc.
+    // Also supports numeric answers: Answer: 1, Ans: 2, etc.
     const answerMatch = line.match(/^(?:ANSWER|ANS|CORRECT|SOLUTION):?\s*[\(\)]?\s*([A-D])/i);
+    const numericAnswerMatch = line.match(/^(?:ANSWER|ANS|CORRECT|SOLUTION):?\s*[\(\)]?\s*([1-4])/i);
+    
     if (answerMatch && currentQuestion) {
       currentQuestion.answer = answerMatch[1].toUpperCase();
+    }
+    
+    if (numericAnswerMatch && currentQuestion) {
+      // Convert numeric answer to letter (1->A, 2->B, 3->C, 4->D)
+      const letterMap = { '1': 'A', '2': 'B', '3': 'C', '4': 'D' };
+      currentQuestion.answer = letterMap[numericAnswerMatch[1]];
     }
 
     // If line looks like a question (starts with number but no option format)
@@ -142,8 +164,10 @@ function parseWordContentAlternative(content) {
       continue;
     }
 
-    // Very lenient option detection - any line starting with a letter
+    // Very lenient option detection - supports both letter (A, B, C, D) and numeric (1, 2, 3, 4) options
     const letterMatch = line.match(/^([A-Da-d])[\.\)\s]+(.+)/);
+    const numericOptionMatch = line.match(/^([1-4])[\)\.\s]+(.+)/);
+    
     if (letterMatch && currentQuestion) {
       currentQuestion.options.push({
         letter: letterMatch[1].toUpperCase(),
@@ -151,9 +175,19 @@ function parseWordContentAlternative(content) {
       });
       continue;
     }
+    
+    if (numericOptionMatch && currentQuestion) {
+      // Convert numeric option to letter (1->A, 2->B, 3->C, 4->D)
+      const letterMap = { '1': 'A', '2': 'B', '3': 'C', '4': 'D' };
+      currentQuestion.options.push({
+        letter: letterMap[numericOptionMatch[1]],
+        text: numericOptionMatch[2]
+      });
+      continue;
+    }
 
     // If we have a question and the line doesn't look like an option, append to question text
-    if (currentQuestion && !letterMatch && !numberMatch) {
+    if (currentQuestion && !letterMatch && !numberMatch && !numericOptionMatch) {
       currentQuestion.text += ' ' + line;
       continue;
     }
