@@ -82,13 +82,15 @@ export default function AdminUploadExam() {
 
     try {
       const token = localStorage.getItem("token");
+
+      // Send pre-parsed questions (matches preview exactly, no re-parsing)
       const formData = new FormData();
-      formData.append("examFile", file);
       formData.append("name", exam.name);
       formData.append("type", exam.type);
       formData.append("batch", exam.batch);
       formData.append("duration", exam.duration);
       formData.append("scheduled_date", exam.scheduled_date);
+      formData.append("questions", JSON.stringify(parseResult.sections));
 
       const response = await fetch("/api/exams/upload-word-exam", {
         method: "POST",

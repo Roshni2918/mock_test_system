@@ -172,34 +172,34 @@ async function handler(req, res) {
   try {
     await runMiddleware(req, res, upload.single('examFile'));
     const file = req.file;
-    if (!file) return res.status(400).json({ message: 'No file uploaded' });
 
-    const { name, type, batch, duration, scheduled_date } = req.body;
+    const { name, type, batch, duration, scheduled_date, questions } = req.body;
     if (!name || !type || !batch || !duration || !scheduled_date) {
       return res.status(400).json({ message: 'Please fill all required fields' });
     }
 
     const { db } = await connectToDatabase();
 
-    let content = '';
-
-    try {
-      const result = await mammoth.extractRawText({ buffer: file.buffer });
-      content = result.value || '';
-      console.log('Mammoth text length:', content.length);
-      console.log('First 500 chars:', content.substring(0, 500));
-    } catch (e) {
-      console.log('mammoth extractRawText failed:', e.message);
-      content = file.buffer.toString('utf8');
-    }
-
-    console.log('Total content length before parsing:', content.length);
-    const sections = universalParse(content);
-    console.log('Parsed sections:', sections.length);
-    console.log('Total questions found:', sections.reduce((sum, s) => sum + s.questions.length, 0));
-    
-    if (sections.reduce((sum, s) => sum + s.questions.length, 0) === 0) {
-      console.log('NO QUESTIONS FOUND - Content sample:', content.substring(0, 1000));
+    // If pre-parsed questions provided, use them directly (matches preview exactly)
+    let sections;
+    if (questions) {
+      try {
+        sections = JSON.parse(questions);
+      } catch (e) {
+        return res.status(400).json({ message: 'Invalid questions format' });
+      }
+    } else if (file) {
+      // Fallback: parse from file (no preview path)
+      let content = '';
+      try {
+        const result = await mammoth.extractRawText({ buffer: file.buffer });
+        content = result.value || '';
+      } catch (e) {
+        content = file.buffer.toString('utf8');
+      }
+      sections = universalParse(content);
+    } else {
+      return res.status(400).json({ message: 'No file uploaded or questions provided' });
     }
 
     // Validate parsed questions BEFORE creating exam
@@ -208,8 +208,7 @@ async function handler(req, res) {
     );
     if (validQuestions.length === 0) {
       return res.status(400).json({
-        message: 'No valid questions found in the uploaded file. Please check the file format.',
-        content_preview: content.substring(0, 500)
+        message: 'No valid questions found in the uploaded file. Please check the file format.'
       });
     }
 
@@ -246,7 +245,6 @@ async function handler(req, res) {
         }
       }
     } catch (insertError) {
-      // Clean up: delete the exam if questions failed to insert
       await db.collection('exams').deleteOne({ _id: examId }).catch(() => {});
       throw insertError;
     }

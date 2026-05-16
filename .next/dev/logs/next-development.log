@@ -1,4 +1,2 @@
-[00:00:04.537] Server  LOG     ✓ Ready in 3.1s
-[00:00:13.717] Server  ERROR   MongoDB Connection Error: Error: querySrv ECONNREFUSED _mongodb._tcp.cluster0.8sepz3g.mongodb.net
-[00:00:27.822] Server  ERROR   Login error: Error: querySrv ECONNREFUSED _mongodb._tcp.cluster0.8sepz3g.mongodb.net
-[00:00:31.142] Server  ERROR   Login error: Error: querySrv ECONNREFUSED _mongodb._tcp.cluster0.8sepz3g.mongodb.net
+[00:00:02.985] Server  LOG     ✓ Ready in 2s
+[00:01:02.219] Server  ERROR   ⨯ Error: Please define MONGODB_URI

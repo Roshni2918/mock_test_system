@@ -50,8 +50,14 @@ async function handler(req, res) {
     });
 
     // Build question details with student answers
+    // Handle both object format {qid: oid} and array format [{question_id, option_id}]
+    const rawAnswers = studentExam.answers || {};
+    const answersList = Array.isArray(rawAnswers)
+      ? rawAnswers
+      : Object.entries(rawAnswers).map(([qId, oId]) => ({ question_id: qId, option_id: oId }));
+
     const questionDetails = questions.map(q => {
-      const studentAnswer = studentExam.answers?.find(a => a.question_id.toString() === q._id.toString());
+      const studentAnswer = answersList.find(a => a.question_id.toString() === q._id.toString());
       const questionOptions = optionsByQuestion[q._id.toString()] || [];
       
       // Find correct option
