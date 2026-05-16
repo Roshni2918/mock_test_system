@@ -1,117 +1,278 @@
 .container {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 8% 12%, #dbeafe 0%, transparent 34%),
-    radial-gradient(circle at 90% 82%, #d6f0ff 0%, transparent 32%),
-    linear-gradient(180deg, #eef3f9 0%, #f6f9fc 100%);
+  display: flex;
+  flex-direction: column;
+  background: #f0f4f8;
 }
 
-.header {
-  background: linear-gradient(120deg, #0f4c81, #2b75c5);
+/* === TOP HEADER === */
+.topBar {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 50%, #1e3a5f 100%);
   color: #fff;
+  padding: 14px 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
-  box-shadow: 0 4px 18px rgba(15, 76, 129, 0.2);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
 }
 
-.header h2 {
-  margin: 0;
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logoIcon {
+  width: 42px; height: 42px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.brandText h1 {
   font-size: 1.2rem;
+  font-weight: 700;
   letter-spacing: 0.02em;
 }
 
-.profile {
-  width: 44px;
-  height: 44px;
-  background:
-    linear-gradient(135deg, #ffffff 0%, #dbeafe 100%),
-    url("https://cdn-icons-png.flaticon.com/512/149/149071.png");
-  background-size: cover;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.75);
+.brandText p {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin-top: 1px;
 }
 
-.loginBox {
-  width: min(640px, calc(100% - 24px));
-  margin: 64px auto;
-  padding: 34px;
-  background: #ffffff;
-  color: #0f172a;
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+/* === HERO SECTION === */
+.hero {
   text-align: center;
-  border-radius: 16px;
-  border: 1px solid #d9e4f1;
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+  padding: 48px 24px 16px;
 }
 
-.loginBox h3 {
-  margin: 0 0 18px;
-  font-size: 1.35rem;
-  color: #0f4c81;
+.hero h2 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #1e3a5f;
+  margin-bottom: 8px;
 }
 
-.radioGroup {
+.hero p {
+  color: #64748b;
+  font-size: 1rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* === SELECTION CARDS === */
+.cardContainer {
   display: flex;
   justify-content: center;
+  gap: 24px;
+  padding: 32px 24px 48px;
   flex-wrap: wrap;
-  gap: 14px;
-  margin: 14px 0;
-  font-size: 0.98rem;
-  color: #334155;
+}
+
+.selectCard {
+  width: 280px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  cursor: pointer;
+  border: 2px solid #e2e8f0;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+
+.selectCard:hover {
+  border-color: #2563eb;
+  box-shadow: 0 8px 30px rgba(37,99,235,0.12);
+  transform: translateY(-4px);
+}
+
+.selectCard .icon {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 28px;
+}
+
+.selectCard:nth-child(1) .icon { background: #eff6ff; color: #2563eb; }
+.selectCard:nth-child(2) .icon { background: #f0fdf4; color: #16a34a; }
+
+.selectCard h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #1e293b;
+}
+
+.selectCard p {
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* === LOGIN BOX === */
+.loginBox {
+  width: min(440px, calc(100% - 32px));
+  margin: 32px auto;
+  padding: 36px 32px;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+
+.loginHeader {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.loginHeader .lockIcon {
+  width: 56px; height: 56px;
+  background: #eff6ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  font-size: 24px;
+}
+
+.loginHeader h3 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.loginHeader p {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.inputGroup {
+  margin-bottom: 18px;
+}
+
+.inputGroup label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 6px;
 }
 
 .input {
   width: 100%;
-  padding: 13px 12px;
-  margin: 10px 0;
-  border: 1px solid #cbd9ea;
-  outline: none;
+  padding: 12px 14px;
+  border: 1.5px solid #e2e8f0;
   border-radius: 10px;
-  font-size: 0.98rem;
-  box-sizing: border-box;
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.2s;
+  background: #f8fafc;
 }
 
 .input:focus {
-  border-color: #2b75c5;
-  box-shadow: 0 0 0 3px rgba(43, 117, 197, 0.14);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+  background: #fff;
+}
+
+.selectInput {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  outline: none;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.selectInput:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
 }
 
 .button {
   width: 100%;
-  padding: 12px 14px;
-  margin-top: 14px;
-  background: linear-gradient(120deg, #0f4c81, #2b75c5);
+  padding: 14px;
+  background: linear-gradient(135deg, #1e3a5f, #2563eb);
   color: #fff;
   border: none;
-  cursor: pointer;
   border-radius: 10px;
-  font-size: 0.98rem;
+  font-size: 1rem;
   font-weight: 700;
-  transition: transform 120ms ease, filter 120ms ease;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
 }
 
 .button:hover {
-  filter: brightness(1.04);
   transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(37,99,235,0.3);
 }
 
-@media (max-width: 720px) {
-  .header {
-    padding: 12px 14px;
-  }
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
 
-  .header h2 {
-    font-size: 1rem;
-  }
+.secondaryBtn {
+  width: 100%;
+  padding: 12px;
+  background: #fff;
+  color: #475569;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 10px;
+}
 
-  .loginBox {
-    margin: 34px auto;
-    padding: 20px 14px;
-  }
+.secondaryBtn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
 
-  .loginBox h3 {
-    font-size: 1.15rem;
-  }
+/* === FOOTER === */
+.footer {
+  text-align: center;
+  padding: 20px;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  border-top: 1px solid #e2e8f0;
+  margin-top: auto;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 640px) {
+  .topBar { padding: 12px 16px; }
+  .brandText h1 { font-size: 1rem; }
+  .hero { padding: 32px 16px 12px; }
+  .hero h2 { font-size: 1.4rem; }
+  .cardContainer { padding: 24px 16px 32px; gap: 16px; }
+  .selectCard { width: 100%; max-width: 320px; }
+  .loginBox { padding: 24px 18px; }
 }
