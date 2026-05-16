@@ -25,8 +25,10 @@ async function handler(req, res) {
 
     const exam = await db.collection('exams').findOne({
       _id: new ObjectId(examId),
-      batch: user.batch,
-      type: user.exam_type
+      $or: [
+        { batch: user.batch },
+        { type: user.exam_type }
+      ]
     });
 
     if (!exam) {

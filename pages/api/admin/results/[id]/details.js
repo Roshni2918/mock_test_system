@@ -1,5 +1,5 @@
-import { connectToDatabase } from '../../../../lib/mongodb';
-import { requireAdmin } from '../../../../lib/auth';
+import { connectToDatabase } from '../../../../../lib/mongodb';
+import { requireAdmin } from '../../../../../lib/auth';
 import { ObjectId } from 'mongodb';
 
 async function handler(req, res) {

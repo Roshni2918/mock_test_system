@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
@@ -18,5 +20,3 @@ a:hover { text-decoration: underline; }
 ::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
 ::selection { background: #2563eb; color: #fff; }
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');

@@ -12,6 +12,8 @@ async function handler(req, res) {
     return res.status(400).json({ message: 'Please fill all required fields' });
   }
 
+  let examId = null;
+
   try {
     const { db } = await connectToDatabase();
 
@@ -43,7 +45,7 @@ async function handler(req, res) {
       created_at: new Date()
     });
 
-    const examId = result.insertedId;
+    examId = result.insertedId;
 
     // Add questions
     let inserted = 0;
