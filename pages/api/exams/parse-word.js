@@ -52,8 +52,8 @@ async function ocrImages(images) {
 }
 
 function universalParse(content) {
-  // Only split at line-starting "ANSWER KEY" or similar headers
-  const ansKeyPattern = /^[\s]*(?:answer\s*(?:key|sheet)|ans\s*(?:key|sheet)|उत्तर\s*(?:सूची|कुंजी)|solution\s*(?:key|sheet)?)[:\s]*$/im;
+  // Split at answer key header (may have number prefix like "35 (Ans Key)")
+  const ansKeyPattern = /^[\s]*(?:\d+\s*[.)(\s]\s*)?(?:answer\s*(?:key|sheet)|ans\s*(?:key|sheet)|उत्तर\s*(?:सूची|कुंजी|माला)|solution\s*(?:key|sheet)?|key)[:\s]*$/im;
   const m = content.match(ansKeyPattern);
   const splitIndex = m ? m.index : content.length;
   const questionsPart = content.substring(0, splitIndex).trim();
@@ -71,7 +71,7 @@ function universalParse(content) {
     }
     if (Object.keys(answerMap).length === 0) {
       for (const line of akLines) {
-        const inlineMatch = line.match(/(\d+)\s*[=:]\s*([A-Da-d1-4])/);
+        const inlineMatch = line.match(/(\d+)\s*[=:.)\]\-\s]\s*([A-Da-d1-4])/);
         if (inlineMatch) answerMap[parseInt(inlineMatch[1])] = inlineMatch[2].toUpperCase();
       }
     }
