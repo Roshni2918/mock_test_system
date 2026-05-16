@@ -15,6 +15,24 @@ async function handler(req, res) {
   try {
     const { db } = await connectToDatabase();
 
+    // Validate all questions BEFORE inserting anything
+    if (!Array.isArray(questions) || questions.length === 0) {
+      return res.status(400).json({ message: 'At least one question is required' });
+    }
+    for (const [idx, q] of questions.entries()) {
+      if (!q.question_text || !q.question_text.trim()) {
+        return res.status(400).json({ message: `Question ${idx + 1} text is required` });
+      }
+      if (!Array.isArray(q.options) || q.options.length !== 4) {
+        return res.status(400).json({ message: `Question ${idx + 1} must have exactly 4 options` });
+      }
+      for (let i = 0; i < q.options.length; i++) {
+        if (!q.options[i] || !q.options[i].trim()) {
+          return res.status(400).json({ message: `Question ${idx + 1}, Option ${i + 1} cannot be empty` });
+        }
+      }
+    }
+
     const result = await db.collection('exams').insertOne({
       name,
       type,
@@ -27,43 +45,28 @@ async function handler(req, res) {
 
     const examId = result.insertedId;
 
-    // Add questions if provided
+    // Add questions
     let inserted = 0;
-    console.log('Questions received:', JSON.stringify(questions));
-    if (Array.isArray(questions)) {
-      for (const [idx, q] of questions.entries()) {
-        console.log(`Question ${idx}:`, JSON.stringify(q));
-        if (!q.question_text || !Array.isArray(q.options) || q.options.length !== 4) {
-          console.log(`Skipping question ${idx} - invalid format`);
-          continue;
-        }
+    for (const q of questions) {
+      const questionResult = await db.collection('questions').insertOne({
+        exam_id: examId,
+        section_name: q.section || null,
+        question_text: q.question_text.trim(),
+        created_at: new Date()
+      });
 
-        const questionResult = await db.collection('questions').insertOne({
-          exam_id: examId,
-          section_name: q.section || null,
-          question_text: q.question_text.trim(),
+      const questionId = questionResult.insertedId;
+
+      for (let i = 0; i < q.options.length; i++) {
+        await db.collection('options').insertOne({
+          question_id: questionId,
+          option_text: q.options[i].trim(),
+          is_correct: parseInt(q.correctOption, 10) === i,
           created_at: new Date()
         });
-
-        const questionId = questionResult.insertedId;
-
-        for (let i = 0; i < q.options.length; i++) {
-          const optText = q.options[i]?.trim();
-          if (!optText) {
-            console.log(`Skipping empty option ${i} for question ${idx}`);
-            continue;
-          }
-          await db.collection('options').insertOne({
-            question_id: questionId,
-            option_text: optText,
-            is_correct: parseInt(q.correctOption, 10) === i,
-            created_at: new Date()
-          });
-        }
-        inserted++;
       }
+      inserted++;
     }
-    console.log(`Total questions inserted: ${inserted}`);
 
     // Update exam with question count
     await db.collection('exams').updateOne(
@@ -78,6 +81,10 @@ async function handler(req, res) {
     });
   } catch (error) {
     console.error('Error creating exam:', error);
+    // If exam was created but something went wrong, delete it to avoid orphan
+    if (examId) {
+      await db.collection('exams').deleteOne({ _id: examId }).catch(() => {});
+    }
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 }

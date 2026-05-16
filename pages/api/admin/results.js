@@ -35,6 +35,8 @@ async function handler(req, res) {
             submitted_at: 1,
             student_name: { $arrayElemAt: ['$student.name', 0] },
             exam_name: { $arrayElemAt: ['$exam.name', 0] },
+            exam_type: { $arrayElemAt: ['$exam.type', 0] },
+            exam_batch: { $arrayElemAt: ['$exam.batch', 0] },
             exam_id: { $arrayElemAt: ['$exam._id', 0] }
           }
         },

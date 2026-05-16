@@ -83,7 +83,7 @@ export default function AdminResults() {
   const applyFilters = (examId, examType) => {
     let filtered = allResults;
     if (examId) {
-      filtered = filtered.filter(r => r.exam_id === parseInt(examId));
+      filtered = filtered.filter(r => r.exam_id && r.exam_id.toString() === examId.toString());
     }
     if (examType) {
       filtered = filtered.filter(r => r.exam_type === examType);

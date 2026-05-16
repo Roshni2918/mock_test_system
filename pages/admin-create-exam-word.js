@@ -9,8 +9,9 @@ export default function AdminCreateExamWord() {
     type: "",
     batch: "",
     duration: "",
+    scheduled_date: "",
   });
-  
+
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
@@ -33,52 +34,36 @@ export default function AdminCreateExamWord() {
 
   const validateForm = () => {
     const newErrors = [];
-    
-    if (!exam.name.trim()) {
-      newErrors.push("Exam name is required");
-    }
-    if (!exam.type.trim()) {
-      newErrors.push("Exam type is required");
-    }
-    if (!exam.batch.trim()) {
-      newErrors.push("Batch is required");
-    }
-    if (!exam.duration || exam.duration <= 0) {
-      newErrors.push("Duration must be greater than 0");
-    }
-    if (!file) {
-      newErrors.push("Please select a file to upload");
-    }
-    
+    if (!exam.name.trim()) newErrors.push("Exam name is required");
+    if (!exam.type.trim()) newErrors.push("Exam type is required");
+    if (!exam.batch.trim()) newErrors.push("Batch is required");
+    if (!exam.duration || exam.duration <= 0) newErrors.push("Duration must be greater than 0");
+    if (!exam.scheduled_date) newErrors.push("Scheduled date and time are required");
+    if (!file) newErrors.push("Please select a Word file to upload");
     setErrors(newErrors);
     return newErrors.length === 0;
   };
 
   const handleCreateExam = async () => {
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setUploading(true);
     setMessage("Processing Word file...");
 
     try {
       const token = localStorage.getItem("token");
-      
-      // Create FormData for file upload
+
       const formData = new FormData();
       formData.append("examFile", file);
       formData.append("name", exam.name);
       formData.append("type", exam.type);
       formData.append("batch", exam.batch);
       formData.append("duration", exam.duration);
+      formData.append("scheduled_date", exam.scheduled_date);
 
       const response = await fetch("/api/exams/upload-word-exam", {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          // Don't set Content-Type for FormData - browser will set it with boundary
-        },
+        headers: { "Authorization": `Bearer ${token}` },
         body: formData,
       });
 
@@ -86,27 +71,21 @@ export default function AdminCreateExamWord() {
       let responseText = "";
       try {
         responseText = await response.text();
-        
-        // Check if responseText exists and is not empty
         if (responseText === null || responseText === undefined || responseText.trim() === '') {
-          throw new Error('Empty or null response from server');
+          throw new Error('Empty response from server');
         }
-        
-        // Check if response is JSON
         const trimmedText = responseText.trim();
         if (trimmedText.startsWith('{') || trimmedText.startsWith('[')) {
           data = JSON.parse(trimmedText);
         } else {
-          // If not JSON, log response and create error object
           console.error('Non-JSON response:', responseText.substring(0, 200));
           throw new Error(`Server returned HTML instead of JSON. Status: ${response.status}`);
         }
       } catch (parseError) {
         console.error('JSON parsing error:', parseError);
-        console.error('Response text:', responseText);
         throw new Error('Invalid server response. Please check backend logs.');
       }
-      
+
       if (!response.ok) {
         if (data && data.errors) {
           setErrors(data.errors);
@@ -114,23 +93,18 @@ export default function AdminCreateExamWord() {
         throw new Error((data && data.message) || "Upload failed");
       }
 
-      // Success
-      setMessage(`✅ ${data?.message || 'Upload successful'}`);
+      setMessage(`Exam created successfully with ${data.total_questions || 0} questions.`);
       setWarnings(data?.warnings || []);
-      
-      // Reset form
-      setExam({ name: "", type: "", batch: "", duration: "" });
+      setExam({ name: "", type: "", batch: "", duration: "", scheduled_date: "" });
       setFile(null);
       setErrors([]);
-      
-      // Refresh exam list in admin dashboard
+
       if (window.reloadExams) {
         window.reloadExams();
       }
-
     } catch (error) {
       console.error("Upload error:", error);
-      setMessage(`❌ ${error.message}`);
+      setMessage(`Error: ${error.message}`);
     } finally {
       setUploading(false);
     }
@@ -145,172 +119,97 @@ export default function AdminCreateExamWord() {
 
   return (
     <ProtectedRoute requiredRole="admin">
-      <AdminLayout activePage="Create Exam (Word)">
-        <div className={styles.card} style={{ paddingBottom: "40px" }}>
-          <h3>📄 Create Exam from Word File</h3>
-          
-          {/* File Upload Section */}
-          <div style={{ marginBottom: "30px", padding: "20px", border: "2px dashed #ddd", borderRadius: "8px" }}>
-            <h4 style={{ marginBottom: "15px", color: "#007bff" }}>📁 Select Word File</h4>
-            
-            <input
-              type="file"
-              onChange={handleFileChange}
-              style={{ 
-                marginBottom: "15px", 
-                padding: "10px", 
-                width: "100%", 
-                border: "1px solid #ddd", 
-                borderRadius: "4px" 
-              }}
-              disabled={uploading}
-            />
-            
+      <AdminLayout activePage="Upload Exam">
+        <div className={styles.card}>
+          <h3>Create Exam from Word File</h3>
+
+          <div style={{ marginBottom: "24px", padding: "24px", border: "2px dashed #cbd5e1", borderRadius: "12px", background: "#f8fafc" }}>
+            <h4 style={{ marginBottom: "12px", color: "#2563eb", fontWeight: 600, fontSize: "0.95rem" }}>Select Word File</h4>
+
+            <input type="file" onChange={handleFileChange}
+              className={styles.input} style={{ marginBottom: "12px", padding: "10px" }}
+              disabled={uploading} />
+
             {file && (
-              <div style={{ 
-                padding: "10px", 
-                backgroundColor: "#e8f5e8", 
-                borderRadius: "4px", 
-                marginBottom: "10px" 
-              }}>
-                <strong>📄 Selected File:</strong> {file.name}
-                <br />
-                <small>Size: {(file.size / 1024 / 1024).toFixed(2)} MB</small>
-                <button
-                  onClick={removeFile}
-                  style={{ 
-                    marginLeft: "10px", 
-                    padding: "2px 8px", 
-                    backgroundColor: "#dc3545", 
-                    color: "white", 
-                    border: "none", 
-                    borderRadius: "3px", 
-                    cursor: "pointer" 
-                  }}
-                  disabled={uploading}
-                >
+              <div style={{ padding: "10px 14px", background: "#f0fdf4", border: "1px solid #86efac", borderRadius: "8px", marginBottom: "8px", fontSize: "0.85rem" }}>
+                <strong>Selected File:</strong> {file.name} <small>({(file.size / 1024 / 1024).toFixed(2)} MB)</small>
+                <button onClick={removeFile} className={styles.btnDanger} style={{ marginLeft: "10px", padding: "2px 10px", fontSize: "0.78rem" }} disabled={uploading}>
                   Remove
                 </button>
               </div>
             )}
-            
-            <div style={{ fontSize: "12px", color: "#666" }}>
-              <strong>Upload behavior:</strong> no fixed format/size restriction at upload stage<br />
-              <strong>Expected content:</strong> parser supports varied layouts and works best when each question has 4 clear options
+
+            <div style={{ fontSize: "0.78rem", color: "#64748b", lineHeight: 1.6 }}>
+              <strong>Expected content:</strong> parser supports varied layouts and works best when each question has 4 clear options.<br />
+              <strong>Images:</strong> images in the document are extracted and processed via OCR automatically.
             </div>
           </div>
 
-          {/* Exam Details Section */}
           <div className={styles.formGrid}>
-            <input
-              value={exam.name}
-              onChange={(e) => updateExamField("name", e.target.value)}
-              placeholder="Exam Name"
-              disabled={uploading}
-            />
-            <input
-              value={exam.type}
-              onChange={(e) => updateExamField("type", e.target.value)}
-              placeholder="Exam Type (e.g., JEE, NDA, UPSC)"
-              disabled={uploading}
-            />
-            <input
-              value={exam.batch}
-              onChange={(e) => updateExamField("batch", e.target.value)}
-              placeholder="Batch (e.g., 2024, 2025)"
-              disabled={uploading}
-            />
-            <input
-              type="number"
-              min="1"
-              value={exam.duration}
-              onChange={(e) => updateExamField("duration", e.target.value)}
-              placeholder="Duration (minutes)"
-              disabled={uploading}
-            />
+            <div className={styles.formGroup}>
+              <label>Exam Name</label>
+              <input className={styles.input} value={exam.name} onChange={(e) => updateExamField("name", e.target.value)} placeholder="Exam name" disabled={uploading} />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Exam Type</label>
+              <input className={styles.input} value={exam.type} onChange={(e) => updateExamField("type", e.target.value)} placeholder="e.g. JEE, NDA, UPSC" disabled={uploading} />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Batch</label>
+              <input className={styles.input} value={exam.batch} onChange={(e) => updateExamField("batch", e.target.value)} placeholder="e.g. 2024" disabled={uploading} />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Duration (minutes)</label>
+              <input className={styles.input} type="number" min="1" value={exam.duration} onChange={(e) => updateExamField("duration", e.target.value)} placeholder="60" disabled={uploading} />
+            </div>
+            <div className={`${styles.formGroup} ${styles.full}`}>
+              <label>Scheduled Date & Time</label>
+              <input className={styles.input} type="datetime-local" value={exam.scheduled_date} onChange={(e) => updateExamField("scheduled_date", e.target.value)} disabled={uploading}
+                min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)} />
+            </div>
           </div>
 
-          {/* Messages Section */}
           {message && (
-            <div style={{ 
-              padding: "10px", 
-              margin: "10px 0", 
-              borderRadius: "4px",
-              backgroundColor: message.includes("✅") ? "#d4edda" : "#f8d7da",
-              color: message.includes("✅") ? "#155724" : "#721c24"
+            <div style={{ marginTop: "16px", padding: "10px 14px", borderRadius: "8px", fontWeight: 600, fontSize: "0.88rem",
+              backgroundColor: message.startsWith("Error") ? "#fef2f2" : "#f0fdf4",
+              color: message.startsWith("Error") ? "#dc2626" : "#16a34a",
+              border: `1px solid ${message.startsWith("Error") ? "#fecaca" : "#86efac"}`
             }}>
               {message}
             </div>
           )}
 
-          {/* Errors Section */}
           {errors.length > 0 && (
-            <div style={{ 
-              padding: "10px", 
-              margin: "10px 0", 
-              backgroundColor: "#f8d7da", 
-              borderRadius: "4px",
-              color: "#721c24" 
-            }}>
-              <strong>❌ Please fix these errors:</strong>
-              <ul style={{ margin: "5px 0 0 20px" }}>
-                {errors.map((error, index) => (
-                  <li key={index}>{error}</li>
-                ))}
+            <div style={{ marginTop: "10px", padding: "10px 14px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "8px", fontSize: "0.85rem", color: "#991b1b" }}>
+              <strong>Please fix these errors:</strong>
+              <ul style={{ margin: "6px 0 0 20px" }}>
+                {errors.map((error, i) => <li key={i}>{error}</li>)}
               </ul>
             </div>
           )}
 
-          {/* Warnings Section */}
           {warnings.length > 0 && (
-            <div style={{ 
-              padding: "10px", 
-              margin: "10px 0", 
-              backgroundColor: "#fff3cd", 
-              borderRadius: "4px",
-              color: "#856404" 
-            }}>
-              <strong>⚠️ Warnings:</strong>
-              <ul style={{ margin: "5px 0 0 20px" }}>
-                {warnings.map((warning, index) => (
-                  <li key={index}>{warning}</li>
-                ))}
+            <div style={{ marginTop: "10px", padding: "10px 14px", background: "#fffbeb", border: "1px solid #fde68a", borderRadius: "8px", fontSize: "0.85rem", color: "#92400e" }}>
+              <strong>Warnings:</strong>
+              <ul style={{ margin: "6px 0 0 20px" }}>
+                {warnings.map((w, i) => <li key={i}>{w}</li>)}
               </ul>
             </div>
           )}
 
-          {/* Create Button */}
-          <button 
-            className={styles.btn} 
-            onClick={handleCreateExam}
-            disabled={uploading}
-            style={{ 
-              marginTop: "20px", 
-              padding: "12px 30px", 
-              fontSize: "16px",
-              backgroundColor: uploading ? "#6c757d" : "#007bff"
-            }}
-          >
-            {uploading ? "⏳ Processing..." : "📤 Create Exam"}
+          <button className={styles.btn} onClick={handleCreateExam} disabled={uploading} style={{ marginTop: "20px", padding: "12px 30px", fontSize: "1rem" }}>
+            {uploading ? "Processing..." : "Upload Exam"}
           </button>
 
-          {/* Help Section */}
-          <div style={{ 
-            marginTop: "30px", 
-            padding: "15px", 
-            backgroundColor: "#f8f9fa", 
-            borderRadius: "4px",
-            fontSize: "14px" 
-          }}>
-            <h4 style={{ marginBottom: "10px" }}>📋 Word File Format Guidelines:</h4>
-            <ul style={{ margin: 0, paddingLeft: "20px" }}>
-              <li>File upload is not blocked by strict format or size gates in the UI</li>
-              <li>Questions can be numbered in common styles like <code>1.</code>, <code>1)</code>, or <code>Q1.</code></li>
+          <div style={{ marginTop: "24px", padding: "14px", background: "#f8fafc", borderRadius: "10px", border: "1px solid #e2e8f0", fontSize: "0.85rem" }}>
+            <h4 style={{ marginBottom: "8px", fontWeight: 600, fontSize: "0.9rem" }}>Word File Format Guidelines:</h4>
+            <ul style={{ margin: 0, paddingLeft: "20px", lineHeight: 1.8 }}>
+              <li>Questions can be numbered like <code>1.</code>, <code>1)</code>, or <code>Q1.</code></li>
               <li>Options should be marked as <code>A)</code>, <code>B)</code>, <code>C)</code>, <code>D)</code></li>
-              <li>Correct answers work best when written as <code>Answer: X</code>, <code>Ans: X</code>, or in an answer-key block</li>
-              <li>Images in Word documents will be automatically extracted</li>
+              <li>Correct answers: <code>Answer: X</code>, <code>Ans: X</code>, or in an answer-key block</li>
+              <li>Images in Word documents are automatically extracted via OCR</li>
               <li>Each question should have 4 clear options for best parsing</li>
-              <li>Example format: <code>1. Question text A) Option 1 B) Option 2 C) Option 3 D) Option 4 Answer: A</code></li>
+              <li>Example: <code>1. Question text A) Option 1 B) Option 2 C) Option 3 D) Option 4 Answer: A</code></li>
             </ul>
           </div>
         </div>
