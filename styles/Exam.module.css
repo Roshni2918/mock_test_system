@@ -117,20 +117,47 @@
   display: flex;
   align-items: center;
   cursor: pointer;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 2px solid #e2e8f0;
+  background: #fff;
+  transition: all 0.15s ease;
+}
+
+.optionLabel:hover {
+  border-color: #93c5fd;
+  background: #f0f7ff;
 }
 
 .optionSelected {
   background: #e6f3ff;
-  border-color: #93c5fd;
+  border-color: #2563eb;
 }
 
 .optionInput {
-  margin-right: 10px;
-  cursor: pointer;
+  display: none;
+}
+
+.optionLetter {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  color: #334155;
+  margin-right: 14px;
+  flex-shrink: 0;
+  border: 1px solid #e2e8f0;
+}
+
+.optionSelected .optionLetter {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
 }
 
 .navRow {

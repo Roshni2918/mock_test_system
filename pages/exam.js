@@ -275,7 +275,8 @@ export default function ExamPage() {
                   onChange={() => handleOption(currentQuestion.id, opt.id)}
                   className={styles.optionInput}
                 />
-                <span>{String.fromCharCode(65 + idx)}) {opt.text}</span>
+                <span className={styles.optionLetter}>{String.fromCharCode(65 + idx)}</span>
+                <span>{opt.text}</span>
               </label>
             </div>
           ))}

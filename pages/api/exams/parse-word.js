@@ -101,11 +101,15 @@ function universalParse(content) {
       continue;
     }
 
-    const optMatch = line.match(/^\(?([1-4A-Da-d])\)?[\.\)\s]+\s*(.+)/);
-    if (optMatch && currentQuestion && currentQuestion.options.length < 4) {
-      const raw = optMatch[1].toUpperCase();
-      const letter = numToLetter[raw] || raw;
-      currentQuestion.options.push({ letter, text: optMatch[2] });
+    // Extract ALL options from the line (handles "1) opt1\t2) opt2\t3) opt3\t4) opt4")
+    const opts = [...line.matchAll(/\(?([1-4A-Da-d])\)?[\.\)\s]+\s*(.*?)(?=\s*\(?[1-4A-Da-d]\)?[\.\)\s]|\s*$)/g)];
+    if (opts.length > 0 && currentQuestion && currentQuestion.options.length < 4) {
+      for (const o of opts) {
+        if (currentQuestion.options.length >= 4) break;
+        const raw = o[1].toUpperCase();
+        const letter = numToLetter[raw] || raw;
+        currentQuestion.options.push({ letter, text: o[2].trim() });
+      }
       continue;
     }
 
@@ -155,8 +159,8 @@ function universalParse(content) {
       let qText = '';
       let ans = '';
       for (const pl of pLines) {
-        const o = pl.match(/^\(?([1-4A-Da-d])\)?[\.\)\s]+\s*(.+)/);
-        if (o) { const raw = o[1].toUpperCase(); opts.push({ letter: numToLetter[raw] || raw, text: o[2] }); continue; }
+        const oo = [...pl.matchAll(/\(?([1-4A-Da-d])\)?[\.\)\s]+\s*(.*?)(?=\s*\(?[1-4A-Da-d]\)?[\.\)\s]|\s*$)/g)];
+        if (oo.length > 0) { for (const o of oo) { const raw = o[1].toUpperCase(); opts.push({ letter: numToLetter[raw] || raw, text: o[2].trim() }); } continue; }
         const a = pl.match(/^(?:answer|ans|correct|उत्तर)[\s:=]+\(?([A-Da-d1-4])\)?/i);
         if (a) { ans = numToLetter[a[1].toUpperCase()] || a[1].toUpperCase(); continue; }
         qText += (qText ? ' ' : '') + pl;
