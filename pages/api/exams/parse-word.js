@@ -52,8 +52,8 @@ async function ocrImages(images) {
 }
 
 function universalParse(content) {
-  // Split at answer key header — match at/near end of line: "Ans Key", "35 (Ans Key)", "Paper - 35 (Ans Key)"
-  const ansKeyPattern = /(?:answer\s*(?:key|sheet)|ans\s*(?:key|sheet)|उत्तर\s*(?:सूची|कुंजी|माला)|solution\s*(?:key|sheet)?)[:\s()]*$/im;
+  // Split at answer key header — supports "Paper - 35 (Ans Key)", "35 (Ans Key)", "Ans Key", "उत्तर सूची", etc.
+  const ansKeyPattern = /^[\s]*(?:(?:\d+[\s(]*)?(?:paper|set|section|part)\s*[-:.\s]+\s*)?\d*[\s(]*(?:answer\s*(?:key|sheet)|ans\s*(?:key|sheet)|उत्तर\s*(?:सूची|कुंजी|माला))[:\s()]*$/im;
   const m = content.match(ansKeyPattern);
   const splitIndex = m ? m.index : content.length;
   const questionsPart = content.substring(0, splitIndex).trim();
@@ -201,6 +201,29 @@ async function handler(req, res) {
     const sections = universalParse(content);
     const totalQuestions = sections.reduce((sum, s) => sum + s.questions.length, 0);
 
+    // Re-run parse to capture debug info
+    const ansKeyPattern = /^[\s]*(?:(?:\d+[\s(]*)?(?:paper|set|section|part)\s*[-:.\s]+\s*)?\d*[\s(]*(?:answer\s*(?:key|sheet)|ans\s*(?:key|sheet)|उत्तर\s*(?:सूची|कुंजी|माला))[:\s()]*$/im;
+    const dm = content.match(ansKeyPattern);
+    const answerKeyPart = dm ? content.substring(dm.index).trim() : '';
+    const answerMap = {};
+    if (answerKeyPart) {
+      const akLines = answerKeyPart.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      let inTable = false;
+      for (const line of akLines) {
+        if (/question\s*no/i.test(line) || /q\.?\s*no/i.test(line)) { inTable = true; continue; }
+        if (!inTable) continue;
+        const pairs = [...line.matchAll(/(\d+)\s+([A-Da-d1-4])/g)];
+        for (const p of pairs) answerMap[parseInt(p[1])] = p[2];
+      }
+      if (Object.keys(answerMap).length === 0) {
+        for (const line of akLines) {
+          if (/(?:answer|ans|key|correct|उत्तर|solution|paper)/i.test(line)) continue;
+          const pairs = [...line.matchAll(/(\d+)\s*[=:.)\]\-\s]\s*([A-Da-d1-4])/g)];
+          for (const p of pairs) answerMap[parseInt(p[1])] = p[2].toUpperCase();
+        }
+      }
+    }
+
     res.status(200).json({
       success: true,
       fileName: file.originalname,
@@ -215,7 +238,14 @@ async function handler(req, res) {
           answer: q.answer || null
         }))
       })),
-      hasOcr: ocrTexts.length > 0
+      hasOcr: ocrTexts.length > 0,
+      _debug: {
+        splitFound: !!dm,
+        answerMapSize: Object.keys(answerMap).length,
+        answerMapSample: Object.fromEntries(Object.entries(answerMap).slice(0, 5)),
+        answerKeyPreview: answerKeyPart.substring(0, 500),
+        contentPreview: content.substring(0, 300)
+      }
     });
   } catch (error) {
     console.error('Parse error:', error);

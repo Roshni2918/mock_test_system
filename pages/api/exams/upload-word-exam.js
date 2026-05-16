@@ -21,8 +21,8 @@ function runMiddleware(req, res, fn) {
 }
 
 function universalParse(content) {
-  // Split at answer key header — match at/near end of line: "Ans Key", "35 (Ans Key)", "Paper - 35 (Ans Key)"
-  const ansKeyPattern = /(?:answer\s*(?:key|sheet)|ans\s*(?:key|sheet)|उत्तर\s*(?:सूची|कुंजी|माला)|solution\s*(?:key|sheet)?)[:\s()]*$/im;
+  // Split at answer key header — supports "Paper - 35 (Ans Key)", "35 (Ans Key)", "Ans Key", "उत्तर सूची", etc.
+  const ansKeyPattern = /^[\s]*(?:(?:\d+[\s(]*)?(?:paper|set|section|part)\s*[-:.\s]+\s*)?\d*[\s(]*(?:answer\s*(?:key|sheet)|ans\s*(?:key|sheet)|उत्तर\s*(?:सूची|कुंजी|माला))[:\s()]*$/im;
   const m = content.match(ansKeyPattern);
   const splitIndex = m ? m.index : content.length;
   const questionsPart = content.substring(0, splitIndex).trim();
