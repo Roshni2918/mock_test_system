@@ -22,7 +22,7 @@ function runMiddleware(req, res, fn) {
 
 function universalParse(content) {
   // Split at answer key header (may have number prefix like "35 (Ans Key)")
-  const ansKeyPattern = /^[\s]*(?:\d+\s*[.)(\s]\s*)?(?:answer\s*(?:key|sheet)|ans\s*(?:key|sheet)|उत्तर\s*(?:सूची|कुंजी|माला)|solution\s*(?:key|sheet)?|key)[:\s]*$/im;
+  const ansKeyPattern = /^[\s]*(?:\d+\s*[.)(\s]\s*)?(?:answer\s*(?:key|sheet)|ans\s*(?:key|sheet)|उत्तर\s*(?:सूची|कुंजी|माला)|solution\s*(?:key|sheet)?|key)[:\s()]*$/im;
   const m = content.match(ansKeyPattern);
   const splitIndex = m ? m.index : content.length;
   const questionsPart = content.substring(0, splitIndex).trim();
@@ -37,15 +37,17 @@ function universalParse(content) {
       // Detect table header
       if (/question\s*no/i.test(line) || /q\.?\s*no/i.test(line)) { inTable = true; continue; }
       if (!inTable) continue;
-      // Match: number <separator> number (tab/space)
-      const rowMatch = line.match(/^(\d+)\s+(\d+)$/);
-      if (rowMatch) {
-        answerMap[parseInt(rowMatch[1])] = rowMatch[2]; // store as option number string
-      }
+      // Match: number + space(s) + option number (e.g. "1  2") or letter (e.g. "1  A")
+      const rowNum = line.match(/^(\d+)\s+(\d+)$/);
+      if (rowNum) { answerMap[parseInt(rowNum[1])] = rowNum[2]; continue; }
+      const rowLet = line.match(/^(\d+)\s+([A-Da-d])$/);
+      if (rowLet) { answerMap[parseInt(rowLet[1])] = rowLet[2].toUpperCase(); }
     }
-    // Also try single-line answer format: "1=A, 2=B, 3=C" or "1-A,2-B"
+    // Also try single-line answer format: "1=A, 2=B, 3=C" or "1-A,2-B" or "1. A"
     if (Object.keys(answerMap).length === 0) {
       for (const line of akLines) {
+        // Skip lines that are themselves answer key headers
+        if (/(?:answer|ans|key|correct|उत्तर|solution)/i.test(line)) continue;
         const inlineMatch = line.match(/(\d+)\s*[=:.)\]\-\s]\s*([A-Da-d1-4])/);
         if (inlineMatch) {
           answerMap[parseInt(inlineMatch[1])] = inlineMatch[2].toUpperCase();
