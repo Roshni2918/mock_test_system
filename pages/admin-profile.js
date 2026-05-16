@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import AdminLayout from "../components/AdminLayout";
+import ProtectedRoute from "../components/ProtectedRoute";
 import styles from "../styles/Admin.module.css";
 
 const initialAdmin = {
@@ -38,6 +39,7 @@ export default function AdminProfile() {
   };
 
   return (
+    <ProtectedRoute requiredRole="admin">
     <AdminLayout activePage="Profile">
       {viewMode === "view" && (
         <div>
@@ -141,5 +143,6 @@ export default function AdminProfile() {
         </div>
       )}
     </AdminLayout>
+    </ProtectedRoute>
   );
 }

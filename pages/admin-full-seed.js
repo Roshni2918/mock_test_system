@@ -14,13 +14,14 @@ export default function AdminFullSeed() {
 
   const checkDataStatus = async () => {
     try {
-      const res = await fetch("/api/seed-full-database", { method: 'GET' });
+      // use POST since GET returns 405
+      const res = await fetch("/api/seed-full-database", { method: 'POST' });
       const data = await res.json();
       if (data.currentData) {
         setCurrentData(data.currentData);
       }
     } catch (error) {
-      // GET not allowed, that's fine
+      // ignore
     }
   };
 

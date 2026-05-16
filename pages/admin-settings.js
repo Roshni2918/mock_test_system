@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AdminLayout from "../components/AdminLayout";
+import ProtectedRoute from "../components/ProtectedRoute";
 import styles from "../styles/Admin.module.css";
 
 export default function AdminSettings() {
@@ -115,9 +116,10 @@ export default function AdminSettings() {
     }
   };
 
-  if (loading) return <AdminLayout activePage="Exam Settings"><div style={{ padding: "20px", color: "#94a3b8" }}>Loading...</div></AdminLayout>;
+  if (loading) return <ProtectedRoute requiredRole="admin"><AdminLayout activePage="Exam Settings"><div style={{ padding: "20px", color: "#94a3b8" }}>Loading...</div></AdminLayout></ProtectedRoute>;
 
   return (
+    <ProtectedRoute requiredRole="admin">
     <AdminLayout activePage="Exam Settings">
       <div className={styles.card}>
         <h3>Exam Settings</h3>
@@ -198,5 +200,6 @@ export default function AdminSettings() {
         {(!Array.isArray(exams) || exams.length === 0) && <p style={{ color: "#94a3b8", marginTop: "12px" }}>No exams created yet.</p>}
       </div>
     </AdminLayout>
+    </ProtectedRoute>
   );
 }

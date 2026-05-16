@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AdminLayout from "../components/AdminLayout";
+import ProtectedRoute from "../components/ProtectedRoute";
 import styles from "../styles/Admin.module.css";
 
 export default function AdminAddStudent() {
@@ -116,7 +117,8 @@ export default function AdminAddStudent() {
   };
 
   return (
-    <AdminLayout activePage="Add Student">
+    <ProtectedRoute requiredRole="admin">
+      <AdminLayout activePage="Add Student">
       <div className={styles.card}>
         <h3>Student Registration</h3>
         <div className={styles.formGrid}>
@@ -183,5 +185,6 @@ export default function AdminAddStudent() {
         <button className={styles.btn} onClick={handleSubmit} style={{ marginTop: "20px" }}>Add Student</button>
       </div>
     </AdminLayout>
+    </ProtectedRoute>
   );
 }

@@ -156,7 +156,6 @@ export default function ExamPage() {
         time_taken: totalTime
       };
       
-      console.log('Submitting exam with data:', submissionData);
       
       const response = await fetch(`/api/exams/submit`, {
         method: "POST",

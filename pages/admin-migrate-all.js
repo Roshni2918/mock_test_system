@@ -64,7 +64,7 @@ export default function AdminMigrateAll() {
   );
 
   return (
-    <ProtectedRoute allowedRoles={["admin"]}>
+    <ProtectedRoute requiredRole="admin">
       <AdminLayout>
         <div className={styles.migrateContainer}>
           <h1>🔄 Migrate All MySQL Data to MongoDB</h1>

@@ -101,7 +101,7 @@ export default function AdminStudents() {
   };
 
   return (
-    <ProtectedRoute allowedRoles={["admin"]}>
+    <ProtectedRoute requiredRole="admin">
       <AdminLayout activePage="Manage Students">
         <div className={styles.card} style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
           <label style={{ fontWeight: 600, fontSize: "0.88rem", color: "#475569" }}>Filter by Exam Type:</label>
