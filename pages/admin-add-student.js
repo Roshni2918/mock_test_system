@@ -19,21 +19,20 @@ export default function AdminAddStudent() {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const generateRollNo = async () => {
-    if (rollNo || isGenerating) return; // Already generated or generating
-    
+    if (rollNo || isGenerating) return;
+
     setIsGenerating(true);
     try {
       const token = localStorage.getItem('token');
       const response = await fetch("/api/students/next-roll", {
         headers: { "Authorization": `Bearer ${token}` }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         const generatedRoll = data.next_roll_no;
         setRollNo(generatedRoll);
-        
-        // Generate email immediately
+
         if (form.name) {
           const firstName = form.name.split(' ')[0].toLowerCase();
           const email = `${firstName}${generatedRoll}@vijeta.com`;
@@ -54,7 +53,7 @@ export default function AdminAddStudent() {
       alert("Please fill all required fields.");
       return;
     }
-    
+
     if (!rollNo) {
       alert("Please click on the Roll No field to generate roll number first.");
       return;
@@ -65,10 +64,10 @@ export default function AdminAddStudent() {
     }
 
     try {
-      const token = localStorage.getItem('token'); // FIXED: Get auth token
+      const token = localStorage.getItem('token');
       const response = await fetch("/api/students/add", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
@@ -99,7 +98,6 @@ export default function AdminAddStudent() {
           : "Unable to add student.";
         throw new Error(data.message || data.error?.sqlMessage || fallbackMessage);
       }
-      // Show the generated roll number and email
       setGeneratedInfo({
         roll_no: data.roll_no,
         email: data.email
@@ -108,8 +106,7 @@ export default function AdminAddStudent() {
       setForm({ name: "", batch: "", exam_type: "", year: "", mobile: "", password: "", confirm: "" });
       setRollNo("");
       setGeneratedEmail("");
-      
-      // FIXED: Refresh the students list
+
       if (window.reloadStudents) {
         window.reloadStudents();
       }
@@ -122,121 +119,68 @@ export default function AdminAddStudent() {
     <AdminLayout activePage="Add Student">
       <div className={styles.card}>
         <h3>Student Registration</h3>
-        <input
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          placeholder="Student Name"
-        />
-        <input
-          value={form.batch}
-          onChange={(e) => setForm({ ...form, batch: e.target.value })}
-          placeholder="Batch"
-        />
-        <select
-          value={form.exam_type}
-          onChange={(e) => setForm({ ...form, exam_type: e.target.value })}
-          required
-        >
-          <option value="">Select Exam Type</option>
-          <option value="JEE">JEE</option>
-          <option value="NEET">NEET</option>
-          <option value="NDA">NDA</option>
-          <option value="UPSC">UPSC</option>
-          <option value="Mock Test">Mock Test</option>
-          <option value="Practice Test">Practice Test</option>
-          <option value="Other">Other</option>
-        </select>
-        <input
-          value={form.year}
-          onChange={(e) => setForm({ ...form, year: e.target.value })}
-          placeholder="Admission Year"
-          type="number"
-        />
-        <input
-          value={form.mobile}
-          onChange={(e) => setForm({ ...form, mobile: e.target.value })}
-          placeholder="Mobile"
-        />
-        
-        {/* Clickable Roll No Field - Auto generates on click */}
-        <div style={{ marginTop: '15px' }}>
-          <label style={{ fontSize: '12px', color: '#666', display: 'block', marginBottom: '5px' }}>
-            Roll No (Click field to auto-generate):
-          </label>
-          <input
-            value={rollNo}
-            onClick={generateRollNo}
-            readOnly
-            placeholder="Click here to generate roll number"
-            style={{ 
-              backgroundColor: rollNo ? '#e8f5e9' : '#fff3cd', 
-              color: rollNo ? '#2e7d32' : '#856404',
-              fontWeight: 'bold',
-              border: rollNo ? '2px solid #4caf50' : '2px solid #ffc107',
-              cursor: 'pointer'
-            }}
-          />
-          {isGenerating && <span style={{ fontSize: '12px', color: '#666' }}> Generating...</span>}
-        </div>
-
-        {/* Auto-generated Email Display */}
-        {generatedEmail && (
-          <div style={{ marginTop: '15px' }}>
-            <label style={{ fontSize: '12px', color: '#666', display: 'block', marginBottom: '5px' }}>
-              Auto-Generated Email:
-            </label>
-            <input
-              value={generatedEmail}
-              readOnly
-              style={{ 
-                backgroundColor: '#e3f2fd', 
-                color: '#1565c0',
-                fontWeight: 'bold',
-                border: '2px solid #2196f3'
-              }}
+        <div className={styles.formGrid}>
+          <div className={styles.formGroup}>
+            <label>Student Name</label>
+            <input className={styles.input} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Full name" />
+          </div>
+          <div className={styles.formGroup}>
+            <label>Batch</label>
+            <input className={styles.input} value={form.batch} onChange={(e) => setForm({ ...form, batch: e.target.value })} placeholder="e.g. 2024" />
+          </div>
+          <div className={styles.formGroup}>
+            <label>Exam Type</label>
+            <select className={styles.select} value={form.exam_type} onChange={(e) => setForm({ ...form, exam_type: e.target.value })} required>
+              <option value="">Select Exam Type</option>
+              <option value="JEE">JEE</option>
+              <option value="NEET">NEET</option>
+              <option value="NDA">NDA</option>
+              <option value="UPSC">UPSC</option>
+              <option value="Mock Test">Mock Test</option>
+              <option value="Practice Test">Practice Test</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div className={styles.formGroup}>
+            <label>Admission Year</label>
+            <input className={styles.input} value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} placeholder="e.g. 2024" type="number" />
+          </div>
+          <div className={styles.formGroup}>
+            <label>Mobile</label>
+            <input className={styles.input} value={form.mobile} onChange={(e) => setForm({ ...form, mobile: e.target.value })} placeholder="Mobile number" />
+          </div>
+          <div className={styles.formGroup}>
+            <label>Roll No (click to auto-generate)</label>
+            <input className={styles.input} value={rollNo} onClick={generateRollNo} readOnly placeholder="Click here to generate"
+              style={{ backgroundColor: rollNo ? '#f0fdf4' : '#fffbeb', color: rollNo ? '#16a34a' : '#b45309', fontWeight: 700, cursor: 'pointer', borderColor: rollNo ? '#86efac' : '#fde68a' }}
+            />
+            {isGenerating && <span style={{ fontSize: '0.78rem', color: '#64748b' }}> Generating...</span>}
+          </div>
+          <div className={styles.formGroup}>
+            <label>Auto-Generated Email</label>
+            <input className={styles.input} value={generatedEmail || ''} readOnly placeholder="Will generate after roll no"
+              style={{ backgroundColor: '#eff6ff', color: '#2563eb', fontWeight: 700, borderColor: '#93c5fd' }}
             />
           </div>
-        )}
+          <div className={styles.formGroup}>
+            <label>Password</label>
+            <input className={styles.input} type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Set password" />
+          </div>
+          <div className={styles.formGroup}>
+            <label>Confirm Password</label>
+            <input className={styles.input} type="password" value={form.confirm} onChange={(e) => setForm({ ...form, confirm: e.target.value })} placeholder="Confirm password" />
+          </div>
+        </div>
 
-        {/* Show Generated Info After Submission */}
         {generatedInfo && (
-          <div style={{ 
-            marginTop: '10px', 
-            padding: '15px', 
-            backgroundColor: '#d1ecf1', 
-            borderRadius: '4px',
-            border: '1px solid #17a2b8'
-          }}>
-            <p style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#0c5460', fontWeight: 'bold' }}>
-              Generated Successfully:
-            </p>
-            <div style={{ marginBottom: '8px' }}>
-              <span style={{ fontSize: '13px', color: '#666' }}>Roll No: </span>
-              <span style={{ fontSize: '13px', color: '#333', fontWeight: 'bold' }}>
-                {generatedInfo.roll_no}
-              </span>
-            </div>
-            <div>
-              <span style={{ fontSize: '13px', color: '#666' }}>Email: </span>
-              <span style={{ fontSize: '13px', color: '#333', fontWeight: 'bold' }}>
-                {generatedInfo.email}
-              </span>
-            </div>
+          <div style={{ marginTop: "16px", padding: "14px", background: "#f0fdf4", border: "1px solid #86efac", borderRadius: "10px", fontSize: "0.88rem" }}>
+            <p style={{ fontWeight: 700, color: "#16a34a", marginBottom: "6px" }}>Generated Successfully:</p>
+            <p><strong>Roll No:</strong> {generatedInfo.roll_no}</p>
+            <p><strong>Email:</strong> {generatedInfo.email}</p>
           </div>
         )}
-        <input
-          type="password"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          placeholder="Password"
-        />
-        <input
-          type="password"
-          value={form.confirm}
-          onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-          placeholder="Confirm Password"
-        />
-        <button className={styles.btn} onClick={handleSubmit}>Add Student</button>
+
+        <button className={styles.btn} onClick={handleSubmit} style={{ marginTop: "20px" }}>Add Student</button>
       </div>
     </AdminLayout>
   );

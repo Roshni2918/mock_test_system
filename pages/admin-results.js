@@ -82,15 +82,12 @@ export default function AdminResults() {
 
   const applyFilters = (examId, examType) => {
     let filtered = allResults;
-
     if (examId) {
       filtered = filtered.filter(r => r.exam_id === parseInt(examId));
     }
-
     if (examType) {
       filtered = filtered.filter(r => r.exam_type === examType);
     }
-
     setFilteredResults(filtered);
   };
 
@@ -125,257 +122,220 @@ export default function AdminResults() {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <AdminLayout activePage="Exam Results"><div style={{ padding: "20px", color: "#94a3b8" }}>Loading...</div></AdminLayout>;
 
   return (
     <ProtectedRoute requiredRole="admin">
       <AdminLayout activePage="Exam Results">
-        <div>
-          <h3>Exam Results Dashboard</h3>
+        <div className={styles.statsGrid}>
+          <div className={styles.statCard}>
+            <div className={`${styles.statIcon} ${styles.statIconBlue}`}>📊</div>
+            <div className={styles.statInfo}>
+              <h4>{filteredResults.length}</h4>
+              <p>Total Submissions</p>
+            </div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={`${styles.statIcon} ${styles.statIconGreen}`}>📈</div>
+            <div className={styles.statInfo}>
+              <h4>{stats.avg}</h4>
+              <p>Average Score</p>
+            </div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={`${styles.statIcon} ${styles.statIconYellow}`}>🏆</div>
+            <div className={styles.statInfo}>
+              <h4>{stats.highest}</h4>
+              <p>Highest Score</p>
+            </div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={`${styles.statIcon} ${styles.statIconRed}`}>📉</div>
+            <div className={styles.statInfo}>
+              <h4>{stats.lowest}</h4>
+              <p>Lowest Score</p>
+            </div>
+          </div>
+        </div>
 
-        {/* FILTER */}
-        <div className={styles.card} style={{ marginBottom: "20px", display: "flex", gap: "20px", flexWrap: "wrap" }}>
-          <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span>Filter by Exam:</span>
-            <select value={selectedExam} onChange={handleExamFilter} style={{ padding: "6px 10px", borderRadius: "4px" }}>
+        <div className={styles.card} style={{ marginBottom: "20px", display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <label style={{ fontWeight: 600, fontSize: "0.85rem", color: "#475569" }}>Exam:</label>
+            <select className={styles.select} value={selectedExam} onChange={handleExamFilter} style={{ width: "auto", minWidth: "160px" }}>
               <option value="">All Exams</option>
               {exams.map(exam => (
-                <option key={exam.id} value={exam.id}>
-                  {exam.name} ({exam.batch})
-                </option>
+                <option key={exam.id} value={exam.id}>{exam.name} ({exam.batch})</option>
               ))}
             </select>
-          </label>
-
-          <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span>Filter by Exam Type:</span>
-            <select value={selectedExamType} onChange={handleExamTypeFilter} style={{ padding: "6px 10px", borderRadius: "4px" }}>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <label style={{ fontWeight: 600, fontSize: "0.85rem", color: "#475569" }}>Type:</label>
+            <select className={styles.select} value={selectedExamType} onChange={handleExamTypeFilter} style={{ width: "auto", minWidth: "140px" }}>
               <option value="">All Types</option>
               {examTypes.map(type => (
                 <option key={type} value={type}>{type}</option>
               ))}
             </select>
-          </label>
-
-          <span style={{ color: "#666", fontSize: "14px", marginLeft: "auto" }}>
+          </div>
+          <span style={{ color: "#64748b", fontSize: "0.85rem", marginLeft: "auto" }}>
             Showing {filteredResults.length} of {allResults.length} results
           </span>
         </div>
 
-        {/* STATISTICS */}
-        {filteredResults.length > 0 && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "15px", marginBottom: "20px" }}>
-            <div className={styles.card} style={{ textAlign: "center" }}>
-              <h4 style={{ margin: "0 0 10px 0", color: "#666" }}>Total Submissions</h4>
-              <div style={{ fontSize: "28px", fontWeight: "bold", color: "#007bff" }}>
-                {filteredResults.length}
-              </div>
-            </div>
-            <div className={styles.card} style={{ textAlign: "center" }}>
-              <h4 style={{ margin: "0 0 10px 0", color: "#666" }}>Average Score</h4>
-              <div style={{ fontSize: "28px", fontWeight: "bold", color: "#28a745" }}>
-                {stats.avg}
-              </div>
-            </div>
-            <div className={styles.card} style={{ textAlign: "center" }}>
-              <h4 style={{ margin: "0 0 10px 0", color: "#666" }}>Highest Score</h4>
-              <div style={{ fontSize: "28px", fontWeight: "bold", color: "#17a2b8" }}>
-                {stats.highest}
-              </div>
-            </div>
-            <div className={styles.card} style={{ textAlign: "center" }}>
-              <h4 style={{ margin: "0 0 10px 0", color: "#666" }}>Lowest Score</h4>
-              <div style={{ fontSize: "28px", fontWeight: "bold", color: "#ffc107" }}>
-                {stats.lowest}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* RESULTS TABLE */}
         {filteredResults.length > 0 ? (
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Student Name</th>
-                <th>Exam Name</th>
-                <th>Exam Type</th>
-                <th>Score</th>
-                <th>Time Taken (min)</th>
-                <th>Status</th>
-                <th>Submitted At</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredResults.map((result) => (
-                <tr key={result.id}>
-                  <td>{result.student_name}</td>
-                  <td>{result.exam_name}</td>
-                  <td>{result.exam_type || '-'}</td>
-                  <td style={{ fontWeight: "bold", color: result.score >= 5 ? "#28a745" : "#dc3545" }}>
-                    {result.score}
-                  </td>
-                  <td>{Math.round(result.time_taken / 60)}</td>
-                  <td>
-                    <span style={{
-                      padding: "5px 10px",
-                      borderRadius: "4px",
-                      background: result.status === 'completed' ? "#d4edda" : "#fff3cd",
-                      color: result.status === 'completed' ? "#155724" : "#856404"
-                    }}>
-                      {result.status}
-                    </span>
-                  </td>
-                  <td>{new Date(result.submitted_at).toLocaleString()}</td>
-                  <td>
-                    <button
-                      className={styles.commonBtn}
-                      onClick={() => fetchResultDetails(result.id)}
-                      disabled={detailsLoading}
-                    >
-                      {detailsLoading ? "Loading..." : "View Details"}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <div style={{ padding: "20px", textAlign: "center", color: "#666" }}>
-            {selectedExam || selectedExamType ? (
-              <div>
-                <div>No results match your filters</div>
-                <div style={{ fontSize: "14px", marginTop: "8px" }}>
-                  {selectedExam && `Exam: ${exams.find(e => e.id === parseInt(selectedExam))?.name || 'Selected'} `}
-                  {selectedExamType && `Type: ${selectedExamType}`}
-                </div>
-                <button 
-                  onClick={() => { setSelectedExam(""); setSelectedExamType(""); setFilteredResults(allResults); }}
-                  style={{ marginTop: "12px", padding: "8px 16px", cursor: "pointer" }}
-                >
-                  Clear Filters
-                </button>
-              </div>
-            ) : (
-              "No results found"
-            )}
-          </div>
-        )}
-
-        {selectedResultDetails && (
-          <div className={styles.card} style={{ marginTop: "20px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-              <h4 style={{ margin: 0 }}>Submission Details</h4>
-              <button className={styles.commonBtn} onClick={() => setSelectedResultDetails(null)}>Close</button>
-            </div>
-
-            <div style={{ marginTop: "12px", lineHeight: 1.7 }}>
-              <div><strong>Student:</strong> {selectedResultDetails.result.student_name} ({selectedResultDetails.result.student_email})</div>
-              <div><strong>Exam:</strong> {selectedResultDetails.result.exam_name} ({selectedResultDetails.result.exam_type} - {selectedResultDetails.result.exam_batch})</div>
-              <div><strong>Score:</strong> {selectedResultDetails.result.score}</div>
-              <div><strong>Submitted At:</strong> {new Date(selectedResultDetails.result.submitted_at).toLocaleString()}</div>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(120px, 1fr))", gap: "10px", marginTop: "14px" }}>
-              <div className={styles.topCard} style={{ marginTop: 0, textAlign: "center" }}>
-                <div style={{ fontSize: "12px", color: "#666" }}>Total</div>
-                <div style={{ fontWeight: 700 }}>{selectedResultDetails.summary.total_questions}</div>
-              </div>
-              <div className={styles.topCard} style={{ marginTop: 0, textAlign: "center" }}>
-                <div style={{ fontSize: "12px", color: "#666" }}>Attempted</div>
-                <div style={{ fontWeight: 700 }}>{selectedResultDetails.summary.attempted_questions}</div>
-              </div>
-              <div className={styles.topCard} style={{ marginTop: 0, textAlign: "center" }}>
-                <div style={{ fontSize: "12px", color: "#666" }}>Unattempted</div>
-                <div style={{ fontWeight: 700 }}>{selectedResultDetails.summary.unattempted_questions}</div>
-              </div>
-              <div className={styles.topCard} style={{ marginTop: 0, textAlign: "center" }}>
-                <div style={{ fontSize: "12px", color: "#666" }}>Correct</div>
-                <div style={{ fontWeight: 700, color: "#28a745" }}>{selectedResultDetails.summary.correct_answers}</div>
-              </div>
-              <div className={styles.topCard} style={{ marginTop: 0, textAlign: "center" }}>
-                <div style={{ fontSize: "12px", color: "#666" }}>Wrong</div>
-                <div style={{ fontWeight: 700, color: "#dc3545" }}>{selectedResultDetails.summary.wrong_answers}</div>
-              </div>
-            </div>
-
-            <table className={styles.table} style={{ marginTop: "14px" }}>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>Question</th>
-                  <th>All Options</th>
-                  <th>Attempted</th>
-                  <th>Marks</th>
-                  <th>Student Answer</th>
-                  <th>Correct Answer</th>
+                  <th>Student Name</th>
+                  <th>Exam Name</th>
+                  <th>Exam Type</th>
+                  <th>Score</th>
+                  <th>Time Taken</th>
                   <th>Status</th>
+                  <th>Submitted At</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {selectedResultDetails.questions.map((question, index) => (
-                  <tr key={question.question_id}>
-                    <td>{index + 1}</td>
-                    <td style={{ textAlign: "left" }}>{question.question_text}</td>
-                    <td style={{ textAlign: "left" }}>
-                      <div style={{ display: "grid", gap: "6px" }}>
-                        {(question.options || []).map((opt) => (
-                          <div
-                            key={opt.id}
-                            style={{
-                              padding: "6px 8px",
-                              borderRadius: "6px",
-                              border: "1px solid #e1e8f0",
-                              backgroundColor: opt.is_correct
-                                ? "#eaf8ef"
-                                : opt.is_selected
-                                  ? "#fff1f0"
-                                  : "#f8fbff",
-                              color: "#1f2937"
-                            }}
-                          >
-                            <strong>{opt.label}.</strong> {opt.text}
-                            {opt.is_selected ? " (Student)" : ""}
-                            {opt.is_correct ? " (Correct)" : ""}
-                          </div>
-                        ))}
-                      </div>
+                {filteredResults.map((result) => (
+                  <tr key={result.id}>
+                    <td><strong>{result.student_name}</strong></td>
+                    <td>{result.exam_name}</td>
+                    <td>{result.exam_type ? <span className={`${styles.badge} ${styles.badgeInfo}`}>{result.exam_type}</span> : '—'}</td>
+                    <td style={{ fontWeight: 700, color: result.score >= 5 ? "#16a34a" : "#dc2626" }}>{result.score}</td>
+                    <td>{Math.round(result.time_taken / 60)} min</td>
+                    <td>
+                      <span className={`${styles.badge} ${result.status === 'completed' ? styles.badgeSuccess : styles.badgeWarning}`}>
+                        {result.status}
+                      </span>
                     </td>
-                    <td style={{ fontWeight: 700, color: question.is_attempted ? "#0f9d73" : "#856404" }}>
-                      {question.is_attempted ? "Yes" : "No"}
-                    </td>
-                    <td style={{ fontWeight: 700 }}>
-                      {question.marks_obtained}
-                    </td>
-                    <td style={{ textAlign: "left" }}>
-                      {question.selected_option_label
-                        ? `${question.selected_option_label}. ${question.selected_option_text}`
-                        : "Not attempted"}
-                    </td>
-                    <td style={{ textAlign: "left" }}>
-                      {question.correct_option_label
-                        ? `${question.correct_option_label}. ${question.correct_option_text}`
-                        : "N/A"}
-                    </td>
-                    <td style={{
-                      fontWeight: 700,
-                      color: question.status === "correct"
-                        ? "#28a745"
-                        : question.status === "wrong"
-                          ? "#dc3545"
-                          : "#856404"
-                    }}>
-                      {question.status}
+                    <td style={{ fontSize: "0.82rem" }}>{result.submitted_at ? new Date(result.submitted_at).toLocaleString() : "—"}</td>
+                    <td>
+                      <button className={styles.btnSecondary} style={{ padding: "4px 12px", fontSize: "0.82rem" }}
+                        onClick={() => fetchResultDetails(result.id)} disabled={detailsLoading}>
+                        {detailsLoading ? "..." : "Details"}
+                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+        ) : (
+          <div className={styles.card} style={{ textAlign: "center", color: "#94a3b8" }}>
+            {selectedExam || selectedExamType ? (
+              <div>
+                <p>No results match your filters.</p>
+                <button className={styles.btnSecondary} style={{ marginTop: "10px" }}
+                  onClick={() => { setSelectedExam(""); setSelectedExamType(""); setFilteredResults(allResults); }}>
+                  Clear Filters
+                </button>
+              </div>
+            ) : "No results found"}
+          </div>
         )}
-      </div>
-    </AdminLayout>
-  </ProtectedRoute>
+
+        {selectedResultDetails && (
+          <div className={styles.card} style={{ marginTop: "20px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: 700, margin: 0 }}>Submission Details</h3>
+              <button className={styles.btnSecondary} style={{ padding: "4px 14px", fontSize: "0.82rem" }} onClick={() => setSelectedResultDetails(null)}>Close</button>
+            </div>
+
+            <div style={{ lineHeight: 1.8, fontSize: "0.9rem", marginBottom: "16px" }}>
+              <p><strong>Student:</strong> {selectedResultDetails.result.student_name} ({selectedResultDetails.result.student_email})</p>
+              <p><strong>Exam:</strong> {selectedResultDetails.result.exam_name} ({selectedResultDetails.result.exam_type} / {selectedResultDetails.result.exam_batch})</p>
+              <p><strong>Score:</strong> {selectedResultDetails.result.score}</p>
+              <p><strong>Submitted At:</strong> {new Date(selectedResultDetails.result.submitted_at).toLocaleString()}</p>
+            </div>
+
+            <div className={styles.statsGrid} style={{ gridTemplateColumns: "repeat(5, 1fr)", marginBottom: "16px" }}>
+              <div className={styles.statCard} style={{ justifyContent: "center", textAlign: "center" }}>
+                <div className={styles.statInfo}>
+                  <h4>{selectedResultDetails.summary.total_questions}</h4>
+                  <p>Total</p>
+                </div>
+              </div>
+              <div className={styles.statCard} style={{ justifyContent: "center", textAlign: "center" }}>
+                <div className={styles.statInfo}>
+                  <h4>{selectedResultDetails.summary.attempted_questions}</h4>
+                  <p>Attempted</p>
+                </div>
+              </div>
+              <div className={styles.statCard} style={{ justifyContent: "center", textAlign: "center" }}>
+                <div className={styles.statInfo}>
+                  <h4>{selectedResultDetails.summary.unattempted_questions}</h4>
+                  <p>Unattempted</p>
+                </div>
+              </div>
+              <div className={styles.statCard} style={{ justifyContent: "center", textAlign: "center" }}>
+                <div className={styles.statInfo}>
+                  <h4 style={{ color: "#16a34a" }}>{selectedResultDetails.summary.correct_answers}</h4>
+                  <p>Correct</p>
+                </div>
+              </div>
+              <div className={styles.statCard} style={{ justifyContent: "center", textAlign: "center" }}>
+                <div className={styles.statInfo}>
+                  <h4 style={{ color: "#dc2626" }}>{selectedResultDetails.summary.wrong_answers}</h4>
+                  <p>Wrong</p>
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Question</th>
+                    <th>All Options</th>
+                    <th>Attempted</th>
+                    <th>Marks</th>
+                    <th>Student Answer</th>
+                    <th>Correct Answer</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedResultDetails.questions.map((question, index) => (
+                    <tr key={question.question_id}>
+                      <td>{index + 1}</td>
+                      <td style={{ textAlign: "left" }}>{question.question_text}</td>
+                      <td style={{ textAlign: "left" }}>
+                        <div style={{ display: "grid", gap: "4px" }}>
+                          {(question.options || []).map((opt) => (
+                            <div key={opt.id} style={{
+                              padding: "4px 8px",
+                              borderRadius: "6px",
+                              border: "1px solid #e2e8f0",
+                              backgroundColor: opt.is_correct ? "#f0fdf4" : opt.is_selected ? "#fef2f2" : "#f8fafc",
+                              fontSize: "0.82rem"
+                            }}>
+                              <strong>{opt.label}.</strong> {opt.text}
+                              {opt.is_selected ? " (Student)" : ""}
+                              {opt.is_correct ? " (Correct)" : ""}
+                            </div>
+                          ))}
+                        </div>
+                      </td>
+                      <td style={{ fontWeight: 700, color: question.is_attempted ? "#16a34a" : "#b45309" }}>
+                        {question.is_attempted ? "Yes" : "No"}
+                      </td>
+                      <td style={{ fontWeight: 700 }}>{question.marks_obtained}</td>
+                      <td>{question.selected_option_label ? `${question.selected_option_label}. ${question.selected_option_text}` : "—"}</td>
+                      <td>{question.correct_option_label ? `${question.correct_option_label}. ${question.correct_option_text}` : "—"}</td>
+                      <td style={{ fontWeight: 700, color: question.status === "correct" ? "#16a34a" : question.status === "wrong" ? "#dc2626" : "#b45309" }}>
+                        {question.status}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </AdminLayout>
+    </ProtectedRoute>
   );
 }

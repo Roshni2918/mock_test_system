@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import styles from "../styles/Admin.module.css";
 
 export default function CreateExam() {
   const [examName, setExamName] = useState("");
@@ -18,133 +17,71 @@ export default function CreateExam() {
     try {
       const duration = parseInt(hour) * 60 + parseInt(minute);
       const token = localStorage.getItem('token');
-      
-      // Fixed: Send correct field names matching backend API
-      const response = await fetch("/api/exams/add", {
+
+      const response = await fetch("/api/admin/create-exam", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           name: examName,
           type: examType,
-          batch: "2024", // Default batch, can be made dynamic
-          duration: duration,
-          scheduled_time: new Date().toISOString()
+          duration,
+          total_questions: parseInt(questions),
         }),
       });
 
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to create exam");
-      }
-
-      setFeedback("Exam created successfully! ID: " + data.exam_id);
+      if (!response.ok) throw new Error(data.message);
+      setFeedback("Exam created successfully!");
       setExamName("");
       setHour("");
       setMinute("");
       setQuestions("");
       setExamType("");
-      
-      // Refresh exam list after creation
-      window.location.reload();
-    } catch (err) {
-      console.error(err);
-      alert(err.message || "Error creating exam");
+    } catch (error) {
+      alert(error.message || "Error creating exam");
     }
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h2>Create Exam</h2>
-      </div>
+    <div style={{ maxWidth: "600px", margin: "40px auto", padding: "20px" }}>
+      <h2 style={{ marginBottom: "20px" }}>Create Exam</h2>
 
-      <div className={styles.card} style={{ maxWidth: "600px", margin: "20px auto" }}>
-        <h3>Exam Details</h3>
-
-        <input
-          type="text"
-          value={examName}
-          onChange={(e) => setExamName(e.target.value)}
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <input type="text" value={examName} onChange={(e) => setExamName(e.target.value)}
           placeholder="Exam Name"
-          className={styles.input}
-        />
+          style={{ padding: "10px", border: "1.5px solid #e2e8f0", borderRadius: "8px" }} />
 
-        <div className={styles.row} style={{ gap: "10px" }}>
-          <input
-            type="number"
-            value={hour}
-            onChange={(e) => setHour(e.target.value)}
-            placeholder="Hour"
-            className={styles.input}
-            min="0"
-          />
-          <input
-            type="number"
-            value={minute}
-            onChange={(e) => setMinute(e.target.value)}
-            placeholder="Minutes"
-            className={styles.input}
-            min="0"
-            max="59"
-          />
+        <div style={{ display: "flex", gap: "10px" }}>
+          <input type="number" value={hour} onChange={(e) => setHour(e.target.value)}
+            placeholder="Hours" min="0"
+            style={{ flex: 1, padding: "10px", border: "1.5px solid #e2e8f0", borderRadius: "8px" }} />
+          <input type="number" value={minute} onChange={(e) => setMinute(e.target.value)}
+            placeholder="Minutes" min="0" max="59"
+            style={{ flex: 1, padding: "10px", border: "1.5px solid #e2e8f0", borderRadius: "8px" }} />
         </div>
 
-        <input
-          type="number"
-          value={questions}
-          onChange={(e) => setQuestions(e.target.value)}
-          placeholder="Total Questions"
-          className={styles.input}
-          min="1"
-        />
+        <input type="number" value={questions} onChange={(e) => setQuestions(e.target.value)}
+          placeholder="Total Questions" min="1"
+          style={{ padding: "10px", border: "1.5px solid #e2e8f0", borderRadius: "8px" }} />
 
-        <select
-          value={examType}
-          onChange={(e) => setExamType(e.target.value)}
-          className={styles.input}
-        >
+        <select value={examType} onChange={(e) => setExamType(e.target.value)}
+          style={{ padding: "10px", border: "1.5px solid #e2e8f0", borderRadius: "8px" }}>
           <option value="">Select Exam Type</option>
           <option value="NDA">NDA</option>
           <option value="NEET">NEET</option>
           <option value="JEE">JEE</option>
         </select>
 
-        <button className={styles.btn} onClick={handleSubmit}>
+        <button onClick={handleSubmit}
+          style={{ padding: "12px", background: "#2563eb", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: 700 }}>
           Create Exam
         </button>
 
-        {feedback && <p style={{ marginTop: "15px", color: "green" }}>{feedback}</p>}
+        {feedback && <p style={{ color: "#16a34a", fontWeight: 600 }}>{feedback}</p>}
       </div>
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -45,7 +45,7 @@ export default function AdminSeedStudentExams() {
   return (
     <ProtectedRoute requiredRole="admin">
       <AdminLayout activePage="Migrate Student Exams">
-        <div className={styles.container}>
+        <div>
           <h2>📝 Migrate Student Exam Results</h2>
           
           <div className={styles.card} style={{ maxWidth: "800px", margin: "20px auto", background: "#fff3cd", border: "2px solid #ffc107" }}>
@@ -70,7 +70,7 @@ export default function AdminSeedStudentExams() {
             <button
               onClick={seedStudentExams}
               disabled={loading}
-              className={styles.commonBtn}
+              className={styles.btn}
               style={{ 
                 background: "#17a2b8", 
                 width: "100%",

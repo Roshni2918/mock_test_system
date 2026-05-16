@@ -3,53 +3,65 @@ import { useRouter } from "next/router";
 import styles from "../styles/Admin.module.css";
 
 const actions = [
-  { title: "Dashboard", route: "/admin-dashboard" },
-  { title: "Create Exam", route: "/admin-create-exam" },
-  { title: "Upload Exam", route: "/admin-upload-exam" },
-  { title: "Add Student", route: "/admin-add-student" },
-  { title: "Manage Students", route: "/admin-students" },
-  { title: "Exam Results", route: "/admin-results" },
-  { title: "Exam Settings", route: "/admin-settings" },
-  { title: "Profile", route: "/admin-profile" },
+  { title: "Dashboard", route: "/admin-dashboard", icon: "📊" },
+  { title: "Create Exam", route: "/admin-create-exam", icon: "📝" },
+  { title: "Upload Exam", route: "/admin-upload-exam", icon: "📄" },
+  { title: "Add Student", route: "/admin-add-student", icon: "👤" },
+  { title: "Manage Students", route: "/admin-students", icon: "👥" },
+  { title: "Exam Results", route: "/admin-results", icon: "📈" },
+  { title: "Exam Settings", route: "/admin-settings", icon: "⚙️" },
+  { title: "Profile", route: "/admin-profile", icon: "👨‍💼" },
 ];
 
 export default function AdminLayout({ children, activePage }) {
   const router = useRouter();
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    router.push('/');
+  };
+
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h2>Admin Dashboard</h2>
-        <div className={styles.profile}>
-          <button 
-            className={styles.logoutBtn}
-            onClick={() => {
-              localStorage.removeItem('token');
-              localStorage.removeItem('user');
-              router.push('/');
-            }}
-          >
+    <div className={styles.layout}>
+      <aside className={styles.sidebar}>
+        <div className={styles.sidebarBrand}>
+          <h2>Vijeta Foundation</h2>
+          <small>Admin Panel</small>
+        </div>
+
+        <nav className={styles.sidebarNav}>
+          {actions.map((action) => (
+            <button
+              key={action.title}
+              className={`${styles.navItem} ${activePage === action.title ? styles.navItemActive : ""}`}
+              onClick={() => router.push(action.route)}
+            >
+              <span className={styles.navIcon}>{action.icon}</span>
+              {action.title}
+            </button>
+          ))}
+        </nav>
+
+        <div className={styles.sidebarFooter}>
+          <button className={styles.logoutBtn} onClick={handleLogout}>
             Logout
           </button>
         </div>
-      </div>
+      </aside>
 
-      <div className={styles.main}>
-        <div className={styles.sidebar}>
-          {actions.map((action) => (
-            <p
-              key={action.title}
-              className={activePage === action.title ? styles.active : ""}
-              onClick={() => router.push(action.route)}
-            >
-              {action.title}
-            </p>
-          ))}
-        </div>
+      <div className={styles.mainContent}>
+        <header className={styles.topBar}>
+          <h1 className={styles.pageTitle}>{activePage || "Dashboard"}</h1>
+          <div className={styles.adminProfile}>
+            <span>Admin</span>
+            <div className={styles.adminAvatar}>A</div>
+          </div>
+        </header>
 
-        <div className={styles.content}>
+        <main className={styles.content}>
           {children}
-        </div>
+        </main>
       </div>
     </div>
   );

@@ -51,34 +51,51 @@ export default function AdminLogin() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <h2>Vijeta Foundation</h2>
-        <div className={styles.profile}></div>
+      <div className={styles.topBar}>
+        <div className={styles.brand}>
+          <div className={styles.logoIcon}>VF</div>
+          <div className={styles.brandText}>
+            <h1>Vijeta Foundation</h1>
+            <p>Common Entrance Test — Online Mock Test System</p>
+          </div>
+        </div>
       </div>
 
-      {/* Login Box */}
       <div className={styles.loginBox}>
-        <h3>Admin Login</h3>
+        <div className={styles.loginHeader}>
+          <div className={styles.lockIcon}>🔐</div>
+          <h3>Admin Login</h3>
+          <p>Sign in to manage exams and students</p>
+        </div>
 
-        <input
-          className={styles.input}
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <div className={styles.inputGroup}>
+          <label>Email Address</label>
+          <input
+            className={styles.input}
+            type="email"
+            placeholder="admin@vijeta.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
 
-        <input
-          className={styles.input}
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className={styles.inputGroup}>
+          <label>Password</label>
+          <input
+            className={styles.input}
+            type="password"
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
 
         <button className={styles.button} onClick={handleLogin} disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
+          {loading ? "Signing in..." : "Sign In"}
+        </button>
+
+        <button className={styles.secondaryBtn} onClick={() => router.push("/")}>
+          Back to Home
         </button>
       </div>
     </div>

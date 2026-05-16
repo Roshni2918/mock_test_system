@@ -57,7 +57,7 @@ export default function AdminSeedData() {
   return (
     <ProtectedRoute requiredRole="admin">
       <AdminLayout activePage="Seed Data">
-        <div className={styles.container}>
+        <div>
           <h2>Database Seed Tool 🌱</h2>
           
           <div className={styles.card} style={{ maxWidth: "600px", margin: "20px auto" }}>
@@ -92,7 +92,7 @@ export default function AdminSeedData() {
             <button
               onClick={seedDatabase}
               disabled={loading}
-              className={styles.commonBtn}
+              className={styles.btn}
               style={{ 
                 background: "#28a745", 
                 width: "100%",

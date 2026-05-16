@@ -43,7 +43,7 @@ export default function AdminStudents() {
     if (!window.confirm("Delete this student?")) return;
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`/api/students/delete/${id}`, { 
+      const res = await fetch(`/api/students/delete/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -80,7 +80,7 @@ export default function AdminStudents() {
       const token = localStorage.getItem("token");
       const res = await fetch(`/api/students/update/${id}`, {
         method: "PUT",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         },
@@ -103,97 +103,95 @@ export default function AdminStudents() {
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
       <AdminLayout activePage="Manage Students">
-      <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <label style={{ fontWeight: 'bold' }}>Filter by Exam Type:</label>
-        <select 
-          value={examFilter} 
-          onChange={(e) => setExamFilter(e.target.value)}
-          style={{ padding: '8px 12px', borderRadius: '4px', border: '1px solid #ddd' }}
-        >
-          <option value="All">All Students</option>
-          <option value="JEE">JEE</option>
-          <option value="NEET">NEET</option>
-          <option value="NDA">NDA</option>
-          <option value="UPSC">UPSC</option>
-          <option value="Mock Test">Mock Test</option>
-          <option value="Practice Test">Practice Test</option>
-          <option value="Other">Other</option>
-          <option value="Any">Not Specified (Any)</option>
-        </select>
-        <span style={{ color: '#666', fontSize: '14px' }}>
-          Showing {filteredStudents.length} of {students.length} students
-        </span>
-      </div>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Batch</th>
-            <th>Exam Type</th>
-            <th>Mobile</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredStudents.length > 0 ? (
-            filteredStudents.map((student) => (
-              <tr key={student.id}>
-                <td>{student.name}</td>
-                <td>{student.email}</td>
-                <td>{student.batch || '-'}</td>
-                <td>{student.exam_type || '-'}</td>
-                <td>{student.mobile_no || '-'}</td>
-                <td>
-                  <button onClick={() => setEditStudent(student)}>Edit</button>
-                  <button onClick={() => deleteStudent(student.id)}>Delete</button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="6">
-                {examFilter === "All" ? "No students found" : `No students with exam type "${examFilter}"`}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-
-      {editStudent && (
-        <div className={styles.card} style={{ marginTop: "20px" }}>
-          <h3>Edit Student</h3>
-          <input
-            value={editStudent.name}
-            onChange={(e) => setEditStudent({ ...editStudent, name: e.target.value })}
-            placeholder="Name"
-          />
-          <input
-            value={editStudent.email}
-            onChange={(e) => setEditStudent({ ...editStudent, email: e.target.value })}
-            placeholder="Email"
-          />
-          <input
-            value={editStudent.batch}
-            onChange={(e) => setEditStudent({ ...editStudent, batch: e.target.value })}
-            placeholder="Batch"
-          />
-          <input
-            value={editStudent.exam_type || ''}
-            onChange={(e) => setEditStudent({ ...editStudent, exam_type: e.target.value })}
-            placeholder="Exam Type"
-          />
-          <input
-            value={editStudent.mobile_no || ''}
-            onChange={(e) => setEditStudent({ ...editStudent, mobile_no: e.target.value })}
-            placeholder="Mobile"
-          />
-          <div className={styles.row}>
-            <button className={styles.btn} onClick={updateStudent}>Update</button>
-            <button className={styles.btn} onClick={() => setEditStudent(null)}>Cancel</button>
-          </div>
+        <div className={styles.card} style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+          <label style={{ fontWeight: 600, fontSize: "0.88rem", color: "#475569" }}>Filter by Exam Type:</label>
+          <select className={styles.select} value={examFilter} onChange={(e) => setExamFilter(e.target.value)} style={{ width: "auto", minWidth: "160px" }}>
+            <option value="All">All Students</option>
+            <option value="JEE">JEE</option>
+            <option value="NEET">NEET</option>
+            <option value="NDA">NDA</option>
+            <option value="UPSC">UPSC</option>
+            <option value="Mock Test">Mock Test</option>
+            <option value="Practice Test">Practice Test</option>
+            <option value="Other">Other</option>
+            <option value="Any">Not Specified</option>
+          </select>
+          <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
+            Showing {filteredStudents.length} of {students.length} students
+          </span>
         </div>
-      )}
+
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Batch</th>
+                <th>Exam Type</th>
+                <th>Mobile</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredStudents.length > 0 ? (
+                filteredStudents.map((student) => (
+                  <tr key={student.id}>
+                    <td><strong>{student.name}</strong></td>
+                    <td>{student.email}</td>
+                    <td>{student.batch || '—'}</td>
+                    <td>{student.exam_type ? <span className={`${styles.badge} ${styles.badgeInfo}`}>{student.exam_type}</span> : '—'}</td>
+                    <td>{student.mobile_no || '—'}</td>
+                    <td>
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        <button className={styles.btnSecondary} style={{ padding: "4px 12px", fontSize: "0.82rem" }} onClick={() => setEditStudent(student)}>Edit</button>
+                        <button className={styles.btnDanger} style={{ padding: "4px 12px", fontSize: "0.82rem" }} onClick={() => deleteStudent(student.id)}>Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: "center", color: "#94a3b8" }}>
+                    {examFilter === "All" ? "No students found" : `No students with exam type "${examFilter}"`}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {editStudent && (
+          <div className={styles.card} style={{ marginTop: "20px" }}>
+            <h3>Edit Student</h3>
+            <div className={styles.formGrid}>
+              <div className={styles.formGroup}>
+                <label>Name</label>
+                <input className={styles.input} value={editStudent.name} onChange={(e) => setEditStudent({ ...editStudent, name: e.target.value })} placeholder="Name" />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Email</label>
+                <input className={styles.input} value={editStudent.email} onChange={(e) => setEditStudent({ ...editStudent, email: e.target.value })} placeholder="Email" />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Batch</label>
+                <input className={styles.input} value={editStudent.batch} onChange={(e) => setEditStudent({ ...editStudent, batch: e.target.value })} placeholder="Batch" />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Exam Type</label>
+                <input className={styles.input} value={editStudent.exam_type || ''} onChange={(e) => setEditStudent({ ...editStudent, exam_type: e.target.value })} placeholder="Exam Type" />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Mobile</label>
+                <input className={styles.input} value={editStudent.mobile_no || ''} onChange={(e) => setEditStudent({ ...editStudent, mobile_no: e.target.value })} placeholder="Mobile" />
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
+              <button className={styles.btn} onClick={updateStudent}>Update</button>
+              <button className={styles.btnSecondary} onClick={() => setEditStudent(null)}>Cancel</button>
+            </div>
+          </div>
+        )}
       </AdminLayout>
     </ProtectedRoute>
   );

@@ -43,15 +43,8 @@ export default function StudentLogin() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message);
 
-      if (data.user.role !== 'student') {
-        throw new Error("Invalid credentials");
-      }
-
       login(data.token);
-      const assignedBatch = data?.user?.batch || "";
-      setBatches(assignedBatch ? [assignedBatch] : []);
-      setSelectedBatch(assignedBatch);
-      setStep("batch");
+      router.push("/student-dashboard");
     } catch (error) {
       alert(error.message || "Login failed");
     } finally {
@@ -59,75 +52,54 @@ export default function StudentLogin() {
     }
   };
 
-  const handleBatchSelect = () => {
-    if (!selectedBatch) {
-      alert("Please select a batch");
-      return;
-    }
-
-    // Store selected batch in localStorage
-    localStorage.setItem('selectedBatch', selectedBatch);
-    
-    // We already authenticated and stored the token.
-    router.push("/student-dashboard");
-  };
-
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <h2>Vijeta Foundation</h2>
-        <div className={styles.profile}></div>
+      <div className={styles.topBar}>
+        <div className={styles.brand}>
+          <div className={styles.logoIcon}>VF</div>
+          <div className={styles.brandText}>
+            <h1>Vijeta Foundation</h1>
+            <p>Common Entrance Test — Online Mock Test System</p>
+          </div>
+        </div>
       </div>
 
-      {/* Login Box */}
       <div className={styles.loginBox}>
-        {step === "login" ? (
-          <>
-            <h3>Student Login</h3>
+        <div className={styles.loginHeader}>
+          <div className={styles.lockIcon}>👤</div>
+          <h3>Student Login</h3>
+          <p>Sign in to access your scheduled exams</p>
+        </div>
 
-            <input
-              className={styles.input}
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+        <div className={styles.inputGroup}>
+          <label>Email Address</label>
+          <input
+            className={styles.input}
+            type="email"
+            placeholder="student@vijeta.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
 
-            <input
-              className={styles.input}
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+        <div className={styles.inputGroup}>
+          <label>Password</label>
+          <input
+            className={styles.input}
+            type="password"
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
 
-            <button className={styles.button} onClick={handleLogin} disabled={loading}>
-              {loading ? "Logging in..." : "Login"}
-            </button>
-          </>
-        ) : (
-          <>
-            <h3>Select Your Batch</h3>
-            {batches.map((batch) => (
-              <div key={batch}>
-                <input
-                  type="radio"
-                  id={batch}
-                  name="batch"
-                  value={batch}
-                  checked={selectedBatch === batch}
-                  onChange={(e) => setSelectedBatch(e.target.value)}
-                />
-                <label htmlFor={batch}>{batch}</label>
-              </div>
-            ))}
+        <button className={styles.button} onClick={handleLogin} disabled={loading}>
+          {loading ? "Signing in..." : "Sign In"}
+        </button>
 
-            <button className={styles.button} onClick={handleBatchSelect}>
-              Continue
-            </button>
-          </>
-        )}
+        <button className={styles.secondaryBtn} onClick={() => router.push("/")}>
+          Back to Home
+        </button>
       </div>
     </div>
   );

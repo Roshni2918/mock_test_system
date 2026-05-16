@@ -173,6 +173,8 @@ async function handler(req, res) {
     try {
       const result = await mammoth.extractRawText({ buffer: file.buffer });
       content = result.value || '';
+      console.log('Mammoth text length:', content.length);
+      console.log('First 500 chars:', content.substring(0, 500));
     } catch (e) {
       console.log('mammoth extractRawText failed:', e.message);
       content = file.buffer.toString('utf8');
@@ -180,8 +182,10 @@ async function handler(req, res) {
 
     try {
       const images = await extractImagesFromDocx(file.buffer);
+      console.log('Images extracted:', images.length);
       if (images.length > 0) {
         ocrTexts = await ocrImages(images);
+        console.log('OCR texts extracted:', ocrTexts.length);
         if (ocrTexts.length > 0) {
           content += '\n\n' + ocrTexts.join('\n\n');
         }
@@ -190,9 +194,14 @@ async function handler(req, res) {
       console.log('Image extraction/OCR failed:', e.message);
     }
 
+    console.log('Total content length before parsing:', content.length);
     const sections = universalParse(content);
     console.log('Parsed sections:', sections.length);
     console.log('Total questions found:', sections.reduce((sum, s) => sum + s.questions.length, 0));
+    
+    if (sections.reduce((sum, s) => sum + s.questions.length, 0) === 0) {
+      console.log('NO QUESTIONS FOUND - Content sample:', content.substring(0, 1000));
+    }
 
     const examResult = await db.collection('exams').insertOne({
       name, type, batch, duration: parseInt(duration, 10),

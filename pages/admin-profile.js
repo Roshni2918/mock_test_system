@@ -41,43 +41,54 @@ export default function AdminProfile() {
     <AdminLayout activePage="Profile">
       {viewMode === "view" && (
         <div>
-          <div className={styles.profileHeader}>
-            <div>
-              <h2>{profile.name}</h2>
-              <p>Vijeta Foundation</p>
-            </div>
-            <div className={styles.profileRight}>
-              <div className={styles.profileImg}></div>
+          <div className={styles.card} style={{ marginBottom: "20px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <h3>{profile.name}</h3>
+                <p style={{ color: "#64748b", fontSize: "0.88rem" }}>Vijeta Foundation</p>
+              </div>
+              <div style={{
+                width: "56px", height: "56px", borderRadius: "50%",
+                background: "#eff6ff", display: "flex", alignItems: "center",
+                justifyContent: "center", fontSize: "1.3rem", fontWeight: 700,
+                color: "#2563eb"
+              }}>
+                {profile.name.split(" ").map(n => n[0]).join("")}
+              </div>
             </div>
           </div>
 
-          <div className={styles.topCard}>
-            <div className={styles.profileGrid}>
-              <div className={styles.profileBox}>
-                <h3>Personal Details</h3>
-                <p><b>Name:</b> {profile.name}</p>
-                <p><b>Email:</b> {profile.email}</p>
-                <p><b>Mobile:</b> {profile.mobile}</p>
-              </div>
-              <div className={styles.profileBox}>
-                <h3>Academy Details</h3>
-                <p><b>Academy:</b> Vijeeta Foundation</p>
-                <p><b>Branch:</b> Main Branch</p>
-                <p><b>Address:</b> Ashta</p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
+            <div className={styles.card}>
+              <h3>Personal Details</h3>
+              <div style={{ lineHeight: 2, fontSize: "0.9rem" }}>
+                <p><strong>Name:</strong> {profile.name}</p>
+                <p><strong>Email:</strong> {profile.email}</p>
+                <p><strong>Mobile:</strong> {profile.mobile}</p>
               </div>
             </div>
-
-            <div className={styles.securityBox}>
-              <h3>Security</h3>
-              <p><b>Last Login:</b> 25 July 2026</p>
-              <p><b>Status:</b> <span className={styles.activeStatus}>Active</span></p>
-              <p><b>Password Changed:</b> 20 July 2026</p>
+            <div className={styles.card}>
+              <h3>Academy Details</h3>
+              <div style={{ lineHeight: 2, fontSize: "0.9rem" }}>
+                <p><strong>Academy:</strong> Vijeeta Foundation</p>
+                <p><strong>Branch:</strong> Main Branch</p>
+                <p><strong>Address:</strong> Ashta</p>
+              </div>
             </div>
+          </div>
 
-            <div className={styles.profileFooter}>
-              <button className={styles.commonBtn} onClick={() => setViewMode("edit")}>Edit Profile</button>
-              <button className={styles.commonBtn} onClick={() => setViewMode("password")}>Change Password</button>
+          <div className={styles.card} style={{ marginBottom: "20px" }}>
+            <h3>Security</h3>
+            <div style={{ lineHeight: 2, fontSize: "0.9rem" }}>
+              <p><strong>Last Login:</strong> 25 July 2026</p>
+              <p><strong>Status:</strong> <span className={`${styles.badge} ${styles.badgeSuccess}`}>Active</span></p>
+              <p><strong>Password Changed:</strong> 20 July 2026</p>
             </div>
+          </div>
+
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button className={styles.btn} onClick={() => setViewMode("edit")}>Edit Profile</button>
+            <button className={styles.btnSecondary} onClick={() => setViewMode("password")}>Change Password</button>
           </div>
         </div>
       )}
@@ -85,24 +96,23 @@ export default function AdminProfile() {
       {viewMode === "edit" && (
         <div className={styles.card}>
           <h3>Edit Profile</h3>
-          <input
-            value={profile.name}
-            onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-            placeholder="Name"
-          />
-          <input
-            value={profile.email}
-            onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-            placeholder="Email"
-          />
-          <input
-            value={profile.mobile}
-            onChange={(e) => setProfile({ ...profile, mobile: e.target.value })}
-            placeholder="Mobile"
-          />
-          <div className={styles.row}>
+          <div className={styles.formGrid}>
+            <div className={styles.formGroup}>
+              <label>Name</label>
+              <input className={styles.input} value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} placeholder="Name" />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Email</label>
+              <input className={styles.input} value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} placeholder="Email" />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Mobile</label>
+              <input className={styles.input} value={profile.mobile} onChange={(e) => setProfile({ ...profile, mobile: e.target.value })} placeholder="Mobile" />
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
             <button className={styles.btn} onClick={handleSave}>Update</button>
-            <button className={styles.btn} onClick={() => setViewMode("view")}>Back</button>
+            <button className={styles.btnSecondary} onClick={() => setViewMode("view")}>Back</button>
           </div>
         </div>
       )}
@@ -110,27 +120,23 @@ export default function AdminProfile() {
       {viewMode === "password" && (
         <div className={styles.card}>
           <h3>Change Password</h3>
-          <input
-            type="password"
-            value={passwordData.oldPass}
-            onChange={(e) => setPasswordData({ ...passwordData, oldPass: e.target.value })}
-            placeholder="Old Password"
-          />
-          <input
-            type="password"
-            value={passwordData.newPass}
-            onChange={(e) => setPasswordData({ ...passwordData, newPass: e.target.value })}
-            placeholder="New Password"
-          />
-          <input
-            type="password"
-            value={passwordData.confirmPass}
-            onChange={(e) => setPasswordData({ ...passwordData, confirmPass: e.target.value })}
-            placeholder="Confirm Password"
-          />
-          <div className={styles.row}>
+          <div className={styles.formGrid}>
+            <div className={styles.formGroup}>
+              <label>Old Password</label>
+              <input className={styles.input} type="password" value={passwordData.oldPass} onChange={(e) => setPasswordData({ ...passwordData, oldPass: e.target.value })} placeholder="Old password" />
+            </div>
+            <div className={styles.formGroup}>
+              <label>New Password</label>
+              <input className={styles.input} type="password" value={passwordData.newPass} onChange={(e) => setPasswordData({ ...passwordData, newPass: e.target.value })} placeholder="New password" />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Confirm Password</label>
+              <input className={styles.input} type="password" value={passwordData.confirmPass} onChange={(e) => setPasswordData({ ...passwordData, confirmPass: e.target.value })} placeholder="Confirm password" />
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
             <button className={styles.btn} onClick={handlePasswordChange}>Update Password</button>
-            <button className={styles.btn} onClick={() => setViewMode("view")}>Back</button>
+            <button className={styles.btnSecondary} onClick={() => setViewMode("view")}>Back</button>
           </div>
         </div>
       )}

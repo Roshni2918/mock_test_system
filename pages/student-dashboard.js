@@ -82,60 +82,96 @@ function StudentDashboardContent() {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h2>Student Dashboard</h2>
-        <button className={styles.btn} onClick={logout}>Logout</button>
-      </div>
+    <div className={styles.layout} style={{ minHeight: "100vh", flexDirection: "column" }}>
+      <header className={styles.topBar}>
+        <h1 className={styles.pageTitle}>Student Dashboard</h1>
+        <div className={styles.adminProfile}>
+          <span>{user?.name || "Student"}</span>
+          <button className={styles.btnSecondary} onClick={logout} style={{ padding: "6px 14px", fontSize: "0.82rem" }}>
+            Logout
+          </button>
+        </div>
+      </header>
 
-      <div className={styles.main}>
-        <div className={styles.content}>
-          <h3>Welcome, {user?.name}</h3>
-          <div style={{ backgroundColor: "#e8f4fd", padding: "15px", borderRadius: "8px", marginBottom: "20px" }}>
-            <p><strong>Your Assigned Exam Type:</strong> {user?.exam_type || 'Not Assigned'}</p>
-            <p><strong>Your Batch:</strong> {user?.batch || 'Not Assigned'}</p>
-            <p style={{ fontSize: "14px", color: "#666", marginTop: "10px" }}>
-              You can only see exams that match your assigned exam type and batch.
-            </p>
-          </div>
-
-          <h4>Available Exams</h4>
-          {exams.length > 0 ? (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px", marginTop: "20px" }}>
-              {exams.map((exam) => (
-                <div key={exam.id} className={styles.card}>
-                  <h3>{exam.name}</h3>
-                  <p>Type: {exam.type}</p>
-                  <p>Batch: {exam.batch}</p>
-                  <p>Duration: {exam.duration} minutes</p>
-                  <p>Scheduled: {new Date(exam.scheduled_time).toLocaleString()}</p>
-                  {!isExamAccessible(exam.scheduled_time) && (
-                    <div style={{ backgroundColor: "#ff6b6b", color: "white", padding: "10px", borderRadius: "5px", marginBottom: "10px" }}>
-                      <p><strong>⏰ Exam Not Yet Available</strong></p>
-                      <p>Time remaining: {getTimeRemainingText(exam.scheduled_time)}</p>
-                      <p>You can start this exam at: {new Date(exam.scheduled_time).toLocaleString()}</p>
-                    </div>
-                  )}
-                  {isExamAccessible(exam.scheduled_time) && (
-                    <button className={styles.btn} onClick={() => startExam(exam.id)}>Start Exam</button>
-                  )}
-                  {!isExamAccessible(exam.scheduled_time) && (
-                    <button className={styles.btn} disabled style={{ backgroundColor: "#ccc", cursor: "not-allowed" }}>
-                      Start Exam (Not Available)
-                    </button>
-                  )}
-                </div>
-              ))}
+      <main className={styles.content}>
+        <div className={styles.statsGrid} style={{ marginBottom: "20px" }}>
+          <div className={styles.statCard}>
+            <div className={`${styles.statIcon} ${styles.statIconBlue}`}>📋</div>
+            <div className={styles.statInfo}>
+              <h4>{exams.length}</h4>
+              <p>Available Exams</p>
             </div>
-          ) : (
-            <p>No exams available</p>
-          )}
-
-          <div style={{ marginTop: "40px", color: "#888" }}>
-            <p><strong>Note:</strong> Exam results are only visible to administrators.</p>
+          </div>
+          <div className={styles.statCard}>
+            <div className={`${styles.statIcon} ${styles.statIconGreen}`}>👤</div>
+            <div className={styles.statInfo}>
+              <h4>{user?.name || "—"}</h4>
+              <p>{user?.batch || "Student"}</p>
+            </div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={`${styles.statIcon} ${styles.statIconYellow}`}>📁</div>
+            <div className={styles.statInfo}>
+              <h4>{user?.exam_type || "N/A"}</h4>
+              <p>Exam Type</p>
+            </div>
           </div>
         </div>
-      </div>
+
+        <div className={styles.card} style={{ marginBottom: "16px", background: "#eff6ff", borderColor: "#93c5fd" }}>
+          <p style={{ fontSize: "0.88rem", color: "#1e40af" }}>
+            <strong>Note:</strong> Exam results are only visible to administrators. You can only see exams matching your assigned exam type ({user?.exam_type || "N/A"}) and batch ({user?.batch || "N/A"}).
+          </p>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+          <h3 style={{ fontSize: "1.15rem", fontWeight: 700 }}>Available Exams</h3>
+          {loading && <span style={{ color: "#64748b", fontSize: "0.85rem" }}>Loading...</span>}
+        </div>
+
+        {loading ? (
+          <div className={styles.card} style={{ textAlign: "center", color: "#94a3b8" }}>
+            Loading exams...
+          </div>
+        ) : exams.length > 0 ? (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "16px" }}>
+            {exams.map((exam) => (
+              <div key={exam.id} className={styles.card} style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ marginBottom: "12px" }}>
+                  <h4 style={{ fontSize: "1.05rem", fontWeight: 700, marginBottom: "4px" }}>{exam.name}</h4>
+                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                    <span className={`${styles.badge} ${styles.badgeInfo}`}>{exam.type}</span>
+                    <span className={`${styles.badge} ${styles.badgeWarning}`}>{exam.batch}</span>
+                  </div>
+                </div>
+                <div style={{ fontSize: "0.85rem", color: "#64748b", marginBottom: "12px", flex: 1 }}>
+                  <p>Duration: {exam.duration} minutes</p>
+                  <p>Scheduled: {new Date(exam.scheduled_time).toLocaleString()}</p>
+                </div>
+                {!isExamAccessible(exam.scheduled_time) ? (
+                  <div>
+                    <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "8px", padding: "10px", marginBottom: "10px", fontSize: "0.82rem", color: "#991b1b" }}>
+                      <strong>Not Yet Available</strong><br />
+                      Starts in: {getTimeRemainingText(exam.scheduled_time)}
+                    </div>
+                    <button className={styles.btn} disabled style={{ opacity: 0.5, cursor: "not-allowed", width: "100%" }}>
+                      Locked
+                    </button>
+                  </div>
+                ) : (
+                  <button className={styles.btn} onClick={() => startExam(exam.id)} style={{ width: "100%" }}>
+                    Start Exam
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className={styles.card} style={{ textAlign: "center", color: "#94a3b8" }}>
+            No exams available for your batch and exam type.
+          </div>
+        )}
+      </main>
     </div>
   );
 }

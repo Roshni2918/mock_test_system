@@ -70,7 +70,7 @@ export default function AdminFullSeed() {
   return (
     <ProtectedRoute requiredRole="admin">
       <AdminLayout activePage="Full Database Seed">
-        <div className={styles.container}>
+        <div>
           <h2>🗄️ Full Database Seed Tool</h2>
           
           <div className={styles.card} style={{ maxWidth: "800px", margin: "20px auto", background: "#fff3cd", border: "2px solid #ffc107" }}>
@@ -97,7 +97,7 @@ export default function AdminFullSeed() {
             <button
               onClick={seedDatabase}
               disabled={loading}
-              className={styles.commonBtn}
+              className={styles.btn}
               style={{ 
                 background: "#28a745", 
                 width: "100%",

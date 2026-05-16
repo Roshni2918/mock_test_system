@@ -8,7 +8,6 @@ export default function Instruction() {
 
   const startExam = () => {
     if (agree) {
-      // ✅ Redirect to exam page with timer (30 min = 1800 sec)
       router.push("/exam?time=1800");
     } else {
       alert("Please accept instructions");
@@ -16,46 +15,52 @@ export default function Instruction() {
   };
 
   return (
-    <div className={styles.container}>
-      
-      {/* Header */}
-      <div className={styles.header}>
-        <h2>Vijeta Foundation</h2>
-        <div className={styles.profile}></div>
+    <div>
+      <div className={styles.topBar}>
+        <div className={styles.brand}>
+          <div className={styles.logoIcon}>VF</div>
+          <div className={styles.brandText}>
+            <h1>Vijeta Foundation</h1>
+            <p>Common Entrance Test — Instructions</p>
+          </div>
+        </div>
       </div>
 
-      {/* Instruction Box */}
       <div className={styles.loginBox}>
-        <h3>Exam Instructions</h3>
+        <div className={styles.loginHeader}>
+          <div className={styles.lockIcon}>📋</div>
+          <h3>Exam Instructions</h3>
+          <p>Please read all instructions carefully before starting</p>
+        </div>
 
-        <ul style={{ textAlign: "left", marginTop: "10px" }}>
-          <li>Read all questions carefully.</li>
-          <li>Do not refresh the page during exam.</li>
-          <li>Each question has only one correct answer.</li>
-          <li>Time is limited, manage your time properly.</li>
-          <li>Once submitted, you cannot change answers.</li>
-        </ul>
+        <div style={{ marginBottom: "20px", fontSize: "0.88rem", lineHeight: 1.8 }}>
+          <p><strong>1.</strong> The exam consists of multiple choice questions.</p>
+          <p><strong>2.</strong> Each question has four options, out of which only one is correct.</p>
+          <p><strong>3.</strong> You can navigate between questions using the Previous and Next buttons.</p>
+          <p><strong>4.</strong> You can mark questions for review and revisit them later.</p>
+          <p><strong>5.</strong> The exam will be automatically submitted when the timer ends.</p>
+          <p><strong>6.</strong> Do not refresh the page or press the back button during the exam.</p>
+          <p><strong>7.</strong> Ensure you have a stable internet connection.</p>
+        </div>
 
-        <div style={{ marginTop: "15px" }}>
+        <label style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px", cursor: "pointer", fontSize: "0.9rem" }}>
           <input
             type="checkbox"
             checked={agree}
-            onChange={() => setAgree(!agree)}
+            onChange={(e) => setAgree(e.target.checked)}
+            style={{ width: "18px", height: "18px" }}
           />
-          <span style={{ marginLeft: "8px" }}>
-            I agree to all instructions
-          </span>
-        </div>
+          I have read and understand all the instructions
+        </label>
 
         <button
           className={styles.button}
           onClick={startExam}
-          style={{ marginTop: "15px" }}
+          disabled={!agree}
         >
           Start Exam
         </button>
       </div>
-
     </div>
   );
 }

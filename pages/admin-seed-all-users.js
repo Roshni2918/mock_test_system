@@ -46,7 +46,7 @@ export default function AdminSeedAllUsers() {
   return (
     <ProtectedRoute requiredRole="admin">
       <AdminLayout activePage="Migrate All Users">
-        <div className={styles.container}>
+        <div>
           <h2>🔄 Migrate ALL MySQL Users to MongoDB</h2>
           
           <div className={styles.card} style={{ maxWidth: "800px", margin: "20px auto", background: "#fff3cd", border: "2px solid #ffc107" }}>
@@ -69,7 +69,7 @@ export default function AdminSeedAllUsers() {
             <button
               onClick={seedAllUsers}
               disabled={loading}
-              className={styles.commonBtn}
+              className={styles.btn}
               style={{ 
                 background: "#dc3545", 
                 width: "100%",

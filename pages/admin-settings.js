@@ -69,13 +69,7 @@ export default function AdminSettings() {
 
   const cancelEdit = () => {
     setEditingExamId(null);
-    setEditForm({
-      name: "",
-      type: "",
-      batch: "",
-      duration: "",
-      scheduled_time: ""
-    });
+    setEditForm({ name: "", type: "", batch: "", duration: "", scheduled_time: "" });
     setMessage("");
   };
 
@@ -121,103 +115,87 @@ export default function AdminSettings() {
     }
   };
 
-  if (loading) return <AdminLayout activePage="Exam Settings"><div>Loading...</div></AdminLayout>;
+  if (loading) return <AdminLayout activePage="Exam Settings"><div style={{ padding: "20px", color: "#94a3b8" }}>Loading...</div></AdminLayout>;
 
   return (
     <AdminLayout activePage="Exam Settings">
       <div className={styles.card}>
         <h3>Exam Settings</h3>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Exam Name</th>
-              <th>Type</th>
-              <th>Batch</th>
-              <th>Duration</th>
-              <th>Scheduled Time</th>
-              <th>Questions</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Array.isArray(exams) && exams.map(exam => (
-              <tr key={exam.id}>
-                <td>
-                  {editingExamId === exam.id ? (
-                    <input
-                      value={editForm.name}
-                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                    />
-                  ) : exam.name}
-                </td>
-                <td>
-                  {editingExamId === exam.id ? (
-                    <select
-                      value={editForm.type}
-                      onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}
-                    >
-                      <option value="JEE">JEE</option>
-                      <option value="NEET">NEET</option>
-                      <option value="NDA">NDA</option>
-                      <option value="UPSC">UPSC</option>
-                      <option value="SSC">SSC</option>
-                      <option value="Police Constable">Police Constable</option>
-                      <option value="Mock Test">Mock Test</option>
-                      <option value="Practice Test">Practice Test</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  ) : exam.type}
-                </td>
-                <td>
-                  {editingExamId === exam.id ? (
-                    <input
-                      value={editForm.batch}
-                      onChange={(e) => setEditForm({ ...editForm, batch: e.target.value })}
-                    />
-                  ) : exam.batch}
-                </td>
-                <td>
-                  {editingExamId === exam.id ? (
-                    <input
-                      type="number"
-                      min="1"
-                      value={editForm.duration}
-                      onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })}
-                    />
-                  ) : `${exam.duration} min`}
-                </td>
-                <td>
-                  {editingExamId === exam.id ? (
-                    <input
-                      type="datetime-local"
-                      value={editForm.scheduled_time}
-                      onChange={(e) => setEditForm({ ...editForm, scheduled_time: e.target.value })}
-                    />
-                  ) : new Date(exam.scheduled_time).toLocaleString()}
-                </td>
-                <td>{exam.total_questions}</td>
-                <td>
-                  {editingExamId === exam.id ? (
-                    <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
-                      <button className={styles.commonBtn} onClick={() => saveEdit(exam.id)} disabled={saving}>
-                        {saving ? "Saving..." : "Save"}
-                      </button>
-                      <button className={styles.commonBtn} onClick={cancelEdit} disabled={saving}>
-                        Cancel
-                      </button>
-                    </div>
-                  ) : (
-                    <button className={styles.commonBtn} onClick={() => startEdit(exam)}>
-                      Edit
-                    </button>
-                  )}
-                </td>
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Exam Name</th>
+                <th>Type</th>
+                <th>Batch</th>
+                <th>Duration</th>
+                <th>Scheduled Time</th>
+                <th>Questions</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        {message && <p style={{ marginTop: "10px", color: message.includes("successfully") ? "green" : "red" }}>{message}</p>}
-        {(!Array.isArray(exams) || exams.length === 0) && <p>No exams created yet.</p>}
+            </thead>
+            <tbody>
+              {Array.isArray(exams) && exams.map(exam => (
+                <tr key={exam.id}>
+                  <td>
+                    {editingExamId === exam.id ? (
+                      <input className={styles.input} value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+                    ) : exam.name}
+                  </td>
+                  <td>
+                    {editingExamId === exam.id ? (
+                      <select className={styles.select} value={editForm.type} onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}>
+                        <option value="JEE">JEE</option>
+                        <option value="NEET">NEET</option>
+                        <option value="NDA">NDA</option>
+                        <option value="UPSC">UPSC</option>
+                        <option value="SSC">SSC</option>
+                        <option value="Police Constable">Police Constable</option>
+                        <option value="Mock Test">Mock Test</option>
+                        <option value="Practice Test">Practice Test</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    ) : <span className={`${styles.badge} ${styles.badgeInfo}`}>{exam.type}</span>}
+                  </td>
+                  <td>
+                    {editingExamId === exam.id ? (
+                      <input className={styles.input} value={editForm.batch} onChange={(e) => setEditForm({ ...editForm, batch: e.target.value })} />
+                    ) : exam.batch}
+                  </td>
+                  <td>
+                    {editingExamId === exam.id ? (
+                      <input className={styles.input} type="number" min="1" value={editForm.duration} onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })} />
+                    ) : `${exam.duration} min`}
+                  </td>
+                  <td style={{ fontSize: "0.82rem" }}>
+                    {editingExamId === exam.id ? (
+                      <input className={styles.input} type="datetime-local" value={editForm.scheduled_time} onChange={(e) => setEditForm({ ...editForm, scheduled_time: e.target.value })} />
+                    ) : new Date(exam.scheduled_time).toLocaleString()}
+                  </td>
+                  <td>{exam.total_questions}</td>
+                  <td>
+                    {editingExamId === exam.id ? (
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        <button className={styles.btn} style={{ padding: "4px 12px", fontSize: "0.82rem" }} onClick={() => saveEdit(exam.id)} disabled={saving}>
+                          {saving ? "..." : "Save"}
+                        </button>
+                        <button className={styles.btnSecondary} style={{ padding: "4px 12px", fontSize: "0.82rem" }} onClick={cancelEdit} disabled={saving}>
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button className={styles.btnSecondary} style={{ padding: "4px 12px", fontSize: "0.82rem" }} onClick={() => startEdit(exam)}>
+                        Edit
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {message && <p style={{ marginTop: "12px", fontWeight: 600, color: message.includes("successfully") ? "#16a34a" : "#dc2626" }}>{message}</p>}
+        {(!Array.isArray(exams) || exams.length === 0) && <p style={{ color: "#94a3b8", marginTop: "12px" }}>No exams created yet.</p>}
       </div>
     </AdminLayout>
   );

@@ -46,7 +46,7 @@ export default function AdminSeedQuestions() {
   return (
     <ProtectedRoute requiredRole="admin">
       <AdminLayout activePage="Migrate Questions">
-        <div className={styles.container}>
+        <div>
           <h2>📝 Migrate Sample Questions from MySQL</h2>
           
           <div className={styles.card} style={{ maxWidth: "800px", margin: "20px auto", background: "#fff3cd", border: "2px solid #ffc107" }}>
@@ -71,7 +71,7 @@ export default function AdminSeedQuestions() {
             <button
               onClick={seedQuestions}
               disabled={loading}
-              className={styles.commonBtn}
+              className={styles.btn}
               style={{ 
                 background: "#6f42c1", 
                 width: "100%",
