@@ -21,8 +21,8 @@ function runMiddleware(req, res, fn) {
 }
 
 function universalParse(content) {
-  // Split at answer key header (may have number prefix like "35 (Ans Key)")
-  const ansKeyPattern = /^[\s]*(?:\d+\s*[.)(\s]\s*)?(?:answer\s*(?:key|sheet)|ans\s*(?:key|sheet)|उत्तर\s*(?:सूची|कुंजी|माला)|solution\s*(?:key|sheet)?|key)[:\s()]*$/im;
+  // Split at answer key header — match at/near end of line: "Ans Key", "35 (Ans Key)", "Paper - 35 (Ans Key)"
+  const ansKeyPattern = /(?:answer\s*(?:key|sheet)|ans\s*(?:key|sheet)|उत्तर\s*(?:सूची|कुंजी|माला)|solution\s*(?:key|sheet)?)[:\s()]*$/im;
   const m = content.match(ansKeyPattern);
   const splitIndex = m ? m.index : content.length;
   const questionsPart = content.substring(0, splitIndex).trim();
@@ -37,20 +37,20 @@ function universalParse(content) {
       // Detect table header
       if (/question\s*no/i.test(line) || /q\.?\s*no/i.test(line)) { inTable = true; continue; }
       if (!inTable) continue;
-      // Match: number + space(s) + option number (e.g. "1  2") or letter (e.g. "1  A")
-      const rowNum = line.match(/^(\d+)\s+(\d+)$/);
-      if (rowNum) { answerMap[parseInt(rowNum[1])] = rowNum[2]; continue; }
-      const rowLet = line.match(/^(\d+)\s+([A-Da-d])$/);
-      if (rowLet) { answerMap[parseInt(rowLet[1])] = rowLet[2].toUpperCase(); }
+      // Extract ALL (question_no, answer) pairs — handles two-column layout like "1\t2\t26\t4"
+      const pairs = [...line.matchAll(/(\d+)\s+([A-Da-d1-4])/g)];
+      for (const p of pairs) {
+        answerMap[parseInt(p[1])] = p[2]; // store raw value (digit or letter)
+      }
     }
     // Also try single-line answer format: "1=A, 2=B, 3=C" or "1-A,2-B" or "1. A"
     if (Object.keys(answerMap).length === 0) {
       for (const line of akLines) {
         // Skip lines that are themselves answer key headers
-        if (/(?:answer|ans|key|correct|उत्तर|solution)/i.test(line)) continue;
-        const inlineMatch = line.match(/(\d+)\s*[=:.)\]\-\s]\s*([A-Da-d1-4])/);
-        if (inlineMatch) {
-          answerMap[parseInt(inlineMatch[1])] = inlineMatch[2].toUpperCase();
+        if (/(?:answer|ans|key|correct|उत्तर|solution|paper)/i.test(line)) continue;
+        const pairs = [...line.matchAll(/(\d+)\s*[=:.)\]\-\s]\s*([A-Da-d1-4])/g)];
+        for (const p of pairs) {
+          answerMap[parseInt(p[1])] = p[2].toUpperCase();
         }
       }
     }
