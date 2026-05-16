@@ -52,12 +52,10 @@ async function ocrImages(images) {
 }
 
 function universalParse(content) {
-  const ansKeyMarkers = [/answer\s*key/i, /ans\s*key/i, /उत्तर\s*सूची/i, /solution/i];
-  let splitIndex = content.length;
-  for (const marker of ansKeyMarkers) {
-    const m = content.match(new RegExp(`\\n\\s*${marker.source}`, 'i'));
-    if (m && m.index < splitIndex) splitIndex = m.index;
-  }
+  // Only split at line-starting "ANSWER KEY" or similar headers
+  const ansKeyPattern = /^[\s]*(?:answer\s*(?:key|sheet)|ans\s*(?:key|sheet)|उत्तर\s*(?:सूची|कुंजी)|solution\s*(?:key|sheet)?)[:\s]*$/im;
+  const m = content.match(ansKeyPattern);
+  const splitIndex = m ? m.index : content.length;
   const questionsPart = content.substring(0, splitIndex).trim();
   const answerKeyPart = content.substring(splitIndex).trim();
 
@@ -97,7 +95,7 @@ function universalParse(content) {
     }
 
     const optMatch = line.match(/^\(?([1-4A-Da-d])\)?[\.\)\s]+\s*(.+)/);
-    if (optMatch && currentQuestion) {
+    if (optMatch && currentQuestion && currentQuestion.options.length < 4) {
       const raw = optMatch[1].toUpperCase();
       const letter = numToLetter[raw] || raw;
       currentQuestion.options.push({ letter, text: optMatch[2] });
