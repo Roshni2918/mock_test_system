@@ -16,6 +16,7 @@ export default function AdminUploadExam() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [parseResult, setParseResult] = useState(null);
+  const [saveResult, setSaveResult] = useState(null);
   const [editingQ, setEditingQ] = useState(null);
 
   const updateExamField = (field, value) => {
@@ -105,6 +106,7 @@ export default function AdminUploadExam() {
         throw new Error(json.message || `Upload failed (${response.status})`);
       }
 
+      setSaveResult(json);
       setStep("done");
       if (window.reloadExams) window.reloadExams();
     } catch (err) {
@@ -129,9 +131,9 @@ export default function AdminUploadExam() {
             <div style={{ fontSize: "48px", marginBottom: "16px" }}>✅</div>
             <h3>Exam Created Successfully!</h3>
             <p style={{ color: "#64748b", margin: "8px 0 20px" }}>
-              {exam.name} — {parseResult?.totalQuestions || 0} questions uploaded.
+              {exam.name} — {saveResult?.total_questions || parseResult?.totalQuestions || 0} questions uploaded.
             </p>
-            <button className={styles.btn} onClick={() => { setStep("form"); setExam({ name: "", type: "", batch: "", duration: "", scheduled_date: "" }); setFile(null); setParseResult(null); }}>
+            <button className={styles.btn} onClick={() => { setStep("form"); setSaveResult(null); setExam({ name: "", type: "", batch: "", duration: "", scheduled_date: "" }); setFile(null); setParseResult(null); }}>
               Upload Another Exam
             </button>
           </div>

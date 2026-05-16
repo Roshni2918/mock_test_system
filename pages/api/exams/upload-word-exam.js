@@ -199,13 +199,11 @@ async function handler(req, res) {
       return res.status(400).json({ message: 'No file uploaded or questions provided' });
     }
 
-    // Validate parsed questions BEFORE creating exam
-    const validQuestions = sections.flatMap(s =>
-      s.questions.filter(q => q.text && q.options.length >= 2)
-    );
-    if (validQuestions.length === 0) {
+    // Count total questions to save
+    const totalQuestions = sections.reduce((sum, s) => sum + s.questions.length, 0);
+    if (totalQuestions === 0) {
       return res.status(400).json({
-        message: 'No valid questions found in the uploaded file. Please check the file format.'
+        message: 'No questions found in the uploaded file. Please check the file format.'
       });
     }
 
@@ -218,9 +216,10 @@ async function handler(req, res) {
     const examId = examResult.insertedId;
 
     try {
+      let inserted = 0;
       for (const section of sections) {
         for (const q of section.questions) {
-          if (!q.text || q.options.length < 2) continue;
+          if (!q.text) continue;
 
           const qr = await db.collection('questions').insertOne({
             exam_id: examId, section_name: section.name,
@@ -230,8 +229,8 @@ async function handler(req, res) {
 
           const questionId = qr.insertedId;
 
-          for (const opt of q.options) {
-            if (opt.text) {
+          for (const opt of q.options || []) {
+            if (opt && opt.text) {
               await db.collection('options').insertOne({
                 question_id: questionId, option_text: opt.text,
                 is_correct: q.answer === opt.letter,
@@ -239,26 +238,25 @@ async function handler(req, res) {
               });
             }
           }
+          inserted++;
         }
       }
+
+      await db.collection('exams').updateOne(
+        { _id: examId },
+        { $set: { total_questions: inserted } }
+      );
+
+      res.status(200).json({
+        message: 'Exam uploaded successfully',
+        exam_id: examId,
+        total_questions: inserted,
+        sections: sections.map(s => ({ name: s.name, questionCount: s.questions.length }))
+      });
     } catch (insertError) {
       await db.collection('exams').deleteOne({ _id: examId }).catch(() => {});
       throw insertError;
     }
-
-    const totalQuestions = validQuestions.length;
-
-    await db.collection('exams').updateOne(
-      { _id: examId },
-      { $set: { total_questions: totalQuestions } }
-    );
-
-    res.status(200).json({
-      message: 'Exam uploaded successfully',
-      exam_id: examId,
-      total_questions: totalQuestions,
-      sections: sections.map(s => ({ name: s.name, questionCount: s.questions.length }))
-    });
 
   } catch (error) {
     console.error('Upload error:', error);
