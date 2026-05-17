@@ -1,23 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
 import styles from "../styles/Login.module.css";
 
 export default function Home() {
   const router = useRouter();
+  const [logoErr, setLogoErr] = useState(false);
 
   return (
     <div className={styles.container}>
       <div className={styles.topBar}>
         <div className={styles.brand}>
-          <div className={styles.logoIcon}>VF</div>
+          {logoErr ? (
+            <div className={styles.logoIcon}>VF</div>
+          ) : (
+            <img src="/logo.jpeg" alt="Logo" className={styles.logoImg}
+              onError={() => setLogoErr(true)}
+            />
+          )}
           <div className={styles.brandText}>
             <h1>Vijeta Foundation</h1>
-            <p>Common Entrance Test — Online Mock Test System</p>
           </div>
         </div>
-        <div className={styles.headerRight}>
-          <span>CET Portal v2.0</span>
-        </div>
+        <div className={styles.headerRight}></div>
       </div>
 
       <div className={styles.hero}>
