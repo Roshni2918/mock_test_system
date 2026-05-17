@@ -52,37 +52,39 @@ async function ocrImages(images) {
 }
 
 function universalParse(content) {
-  // Split at answer key header — supports "Paper - 35 (Ans Key)", "35 (Ans Key)", "Ans Key", "उत्तर सूची", etc.
+  // Extract answer map by scanning entire content for answer key table patterns
+  const answerMap = {};
+  const allLines = content.split('\n');
+  // First pass: detect table header and extract pairs
+  let inTable = false;
+  for (const rawLine of allLines) {
+    const line = rawLine.trim();
+    if (!line) { continue; }
+    if (!inTable) {
+      if (/question\s*no/i.test(line) || /q\.?\s*no/i.test(line)) { inTable = true; }
+      continue;
+    }
+    // Extract ALL (question_no, answer) pairs — handles two-column layout
+    const pairs = [...line.matchAll(/(\d+)\s+([A-Da-d1-4])/g)];
+    if (pairs.length > 0) {
+      for (const p of pairs) answerMap[parseInt(p[1])] = p[2];
+    }
+  }
+  // Second pass: if no table found, try inline format on all lines
+  if (Object.keys(answerMap).length === 0) {
+    for (const rawLine of allLines) {
+      const line = rawLine.trim();
+      if (!line || /(?:answer|ans|key|correct|उत्तर|solution|paper)/i.test(line)) continue;
+      const pairs = [...line.matchAll(/(\d+)\s*[=:.)\]\-\s]\s*([A-Da-d1-4])/g)];
+      for (const p of pairs) answerMap[parseInt(p[1])] = p[2].toUpperCase();
+    }
+  }
+
+  // Now split content at answer key header for question parsing
   const ansKeyPattern = /^[\s]*(?:(?:\d+[\s(]*)?(?:paper|set|section|part)\s*[-:.\s]+\s*)?\d*[\s(]*(?:answer\s*(?:key|sheet)|ans\s*(?:key|sheet)|उत्तर\s*(?:सूची|कुंजी|माला))[:\s()]*$/im;
   const m = content.match(ansKeyPattern);
   const splitIndex = m ? m.index : content.length;
   const questionsPart = content.substring(0, splitIndex).trim();
-  const answerKeyPart = content.substring(splitIndex).trim();
-
-  const answerMap = {};
-  if (answerKeyPart) {
-    const akLines = answerKeyPart.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    let inTable = false;
-    for (const line of akLines) {
-      if (/question\s*no/i.test(line) || /q\.?\s*no/i.test(line)) { inTable = true; continue; }
-      if (!inTable) continue;
-      // Extract ALL (question_no, answer) pairs — handles two-column layout like "1\t2\t26\t4"
-      const pairs = [...line.matchAll(/(\d+)\s+([A-Da-d1-4])/g)];
-      for (const p of pairs) {
-        answerMap[parseInt(p[1])] = p[2]; // store raw value (digit or letter)
-      }
-    }
-    if (Object.keys(answerMap).length === 0) {
-      for (const line of akLines) {
-        // Skip lines that are themselves answer key headers
-        if (/(?:answer|ans|key|correct|उत्तर|solution|paper)/i.test(line)) continue;
-        const pairs = [...line.matchAll(/(\d+)\s*[=:.)\]\-\s]\s*([A-Da-d1-4])/g)];
-        for (const p of pairs) {
-          answerMap[parseInt(p[1])] = p[2].toUpperCase();
-        }
-      }
-    }
-  }
 
   const lines = questionsPart.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   const sections = [];
@@ -102,7 +104,8 @@ function universalParse(content) {
     }
 
     // Extract ALL options from the line (handles "1) opt1\t2) opt2\t3) opt3\t4) opt4")
-    const opts = [...line.matchAll(/\(?([1-4A-Da-d])\)?[\.\)\s]+\s*(.*?)(?=\s*\(?[1-4A-Da-d]\)?[\.\)\s]|\s*$)/g)];
+    // Use negative lookbehind so digits inside text (e.g., "अनुच्छेद 14") aren't matched as option markers
+    const opts = [...line.matchAll(/\(?([1-4A-Da-d])\)?[\.\)\s]+\s*(.*?)(?=\s*\(?(?<!\d)[1-4A-Da-d]\)?[\.\)\s]|\s*$)/g)];
     if (opts.length > 0 && currentQuestion && currentQuestion.options.length < 4) {
       for (const o of opts) {
         if (currentQuestion.options.length >= 4) break;
@@ -159,7 +162,7 @@ function universalParse(content) {
       let qText = '';
       let ans = '';
       for (const pl of pLines) {
-        const oo = [...pl.matchAll(/\(?([1-4A-Da-d])\)?[\.\)\s]+\s*(.*?)(?=\s*\(?[1-4A-Da-d]\)?[\.\)\s]|\s*$)/g)];
+        const oo = [...pl.matchAll(/\(?([1-4A-Da-d])\)?[\.\)\s]+\s*(.*?)(?=\s*\(?(?<!\d)[1-4A-Da-d]\)?[\.\)\s]|\s*$)/g)];
         if (oo.length > 0) { for (const o of oo) { const raw = o[1].toUpperCase(); opts.push({ letter: numToLetter[raw] || raw, text: o[2].trim() }); } continue; }
         const a = pl.match(/^(?:answer|ans|correct|उत्तर)[\s:=]+\(?([A-Da-d1-4])\)?/i);
         if (a) { ans = numToLetter[a[1].toUpperCase()] || a[1].toUpperCase(); continue; }
@@ -205,26 +208,29 @@ async function handler(req, res) {
     const sections = universalParse(content);
     const totalQuestions = sections.reduce((sum, s) => sum + s.questions.length, 0);
 
-    // Re-run parse to capture debug info
-    const ansKeyPattern = /^[\s]*(?:(?:\d+[\s(]*)?(?:paper|set|section|part)\s*[-:.\s]+\s*)?\d*[\s(]*(?:answer\s*(?:key|sheet)|ans\s*(?:key|sheet)|उत्तर\s*(?:सूची|कुंजी|माला))[:\s()]*$/im;
-    const dm = content.match(ansKeyPattern);
-    const answerKeyPart = dm ? content.substring(dm.index).trim() : '';
+    // Re-run parse to capture debug info — scan all lines for answer patterns
+    const dm = null; // not used; answerMap extracted from full content
     const answerMap = {};
-    if (answerKeyPart) {
-      const akLines = answerKeyPart.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-      let inTable = false;
-      for (const line of akLines) {
-        if (/question\s*no/i.test(line) || /q\.?\s*no/i.test(line)) { inTable = true; continue; }
-        if (!inTable) continue;
-        const pairs = [...line.matchAll(/(\d+)\s+([A-Da-d1-4])/g)];
-        for (const p of pairs) answerMap[parseInt(p[1])] = p[2];
+    let inTable = false;
+    for (const rawLine of content.split('\n')) {
+      const line = rawLine.trim();
+      if (!line) continue;
+      if (!inTable) {
+        if (/question\s*no/i.test(line) || /q\.?\s*no/i.test(line)) { inTable = true; }
+        continue;
       }
-      if (Object.keys(answerMap).length === 0) {
-        for (const line of akLines) {
-          if (/(?:answer|ans|key|correct|उत्तर|solution|paper)/i.test(line)) continue;
-          const pairs = [...line.matchAll(/(\d+)\s*[=:.)\]\-\s]\s*([A-Da-d1-4])/g)];
-          for (const p of pairs) answerMap[parseInt(p[1])] = p[2].toUpperCase();
-        }
+      const pairs = [...line.matchAll(/(\d+)\s+([A-Da-d1-4])/g)];
+      if (pairs.length > 0) {
+        for (const p of pairs) answerMap[parseInt(p[1])] = p[2];
+        break; // first data row is sufficient for debug sample
+      }
+    }
+    if (Object.keys(answerMap).length === 0) {
+      for (const rawLine of content.split('\n')) {
+        const line = rawLine.trim();
+        if (!line || /(?:answer|ans|key|correct|उत्तर|solution|paper)/i.test(line)) continue;
+        const pairs = [...line.matchAll(/(\d+)\s*[=:.)\]\-\s]\s*([A-Da-d1-4])/g)];
+        for (const p of pairs) answerMap[parseInt(p[1])] = p[2].toUpperCase();
       }
     }
 
@@ -244,10 +250,9 @@ async function handler(req, res) {
       })),
       hasOcr: ocrTexts.length > 0,
       _debug: {
-        splitFound: !!dm,
         answerMapSize: Object.keys(answerMap).length,
         answerMapSample: Object.fromEntries(Object.entries(answerMap).slice(0, 5)),
-        answerKeyPreview: answerKeyPart.substring(0, 500),
+        linesTotal: content.split('\n').length,
         contentPreview: content.substring(0, 300)
       }
     });
