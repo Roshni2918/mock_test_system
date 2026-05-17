@@ -161,10 +161,10 @@ function universalParse(content, preExtractedAnswers = {}) {
 
   for (const line of lines) {
     // Section header detection
-    if (/^(section|topic|chapter|unit|part|subject|paper)\s*[-:.\s]/i.test(line)) {
+    if (/^(section|topic|chapter|unit|part|subject|paper)\b/i.test(line)) {
       if (currentQuestion && currentQuestion.options.length > 0) currentSection.questions.push(currentQuestion);
       currentQuestion = null;
-      currentSection = { name: line.replace(/^(section|topic|chapter|unit|part|subject|paper)\s*[-:.\s]*/i, '').trim(), questions: [] };
+      currentSection = { name: line.replace(/^(section|topic|chapter|unit|part|subject|paper)\s*[:\s.-]*(?:\d+\s*[:\s.-]*)?/i, '').trim(), questions: [] };
       sections.push(currentSection);
       continue;
     }
