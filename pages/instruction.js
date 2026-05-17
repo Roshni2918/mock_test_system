@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
+import Logo from "../components/Logo";
 import styles from "../styles/Login.module.css";
 
 export default function Instruction() {
@@ -18,10 +19,9 @@ export default function Instruction() {
     <div>
       <div className={styles.topBar}>
         <div className={styles.brand}>
-          <div className={styles.logoIcon}>VF</div>
+          <Logo size={42} />
           <div className={styles.brandText}>
             <h1>Vijeta Foundation</h1>
-            <p>Common Entrance Test — Instructions</p>
           </div>
         </div>
       </div>

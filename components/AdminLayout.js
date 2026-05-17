@@ -1,5 +1,6 @@
 import React from "react";
 import { useRouter } from "next/router";
+import Logo from "./Logo";
 import styles from "../styles/Admin.module.css";
 
 const actions = [
@@ -52,7 +53,10 @@ export default function AdminLayout({ children, activePage }) {
 
       <div className={styles.mainContent}>
         <header className={styles.topBar}>
-          <h1 className={styles.pageTitle}>{activePage || "Dashboard"}</h1>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <Logo size={36} admin />
+            <h1 className={styles.pageTitle}>{activePage || "Dashboard"}</h1>
+          </div>
           <div className={styles.adminProfile}>
             <span>Admin</span>
             <div className={styles.adminAvatar}>A</div>

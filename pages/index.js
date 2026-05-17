@@ -1,22 +1,16 @@
-import React, { useState } from "react";
+import React from "react";
 import { useRouter } from "next/router";
+import Logo from "../components/Logo";
 import styles from "../styles/Login.module.css";
 
 export default function Home() {
   const router = useRouter();
-  const [logoErr, setLogoErr] = useState(false);
 
   return (
     <div className={styles.container}>
       <div className={styles.topBar}>
         <div className={styles.brand}>
-          {logoErr ? (
-            <div className={styles.logoIcon}>VF</div>
-          ) : (
-            <img src="/logo.jpeg" alt="Logo" className={styles.logoImg}
-              onError={() => setLogoErr(true)}
-            />
-          )}
+          <Logo size={42} />
           <div className={styles.brandText}>
             <h1>Vijeta Foundation</h1>
           </div>

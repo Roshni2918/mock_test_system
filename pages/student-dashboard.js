@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../components/AuthContext";
 import ProtectedRoute from "../components/ProtectedRoute";
+import Logo from "../components/Logo";
 import styles from "../styles/Admin.module.css";
 
 export default function StudentDashboard() {
@@ -18,6 +19,7 @@ function StudentDashboardContent() {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [now, setNow] = useState(Date.now());
+
 
   const parseResponseSafely = async (response) => {
     const responseText = await response.text();
@@ -84,7 +86,10 @@ function StudentDashboardContent() {
   return (
     <div className={styles.layout} style={{ minHeight: "100vh", flexDirection: "column" }}>
       <header className={styles.topBar}>
-        <h1 className={styles.pageTitle}>Student Dashboard</h1>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <Logo size={36} admin />
+          <h1 className={styles.pageTitle}>Student Dashboard</h1>
+        </div>
         <div className={styles.adminProfile}>
           <span>{user?.name || "Student"}</span>
           <button className={styles.btnSecondary} onClick={logout} style={{ padding: "6px 14px", fontSize: "0.82rem" }}>

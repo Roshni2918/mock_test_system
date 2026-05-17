@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styles from "../styles/Login.module.css";
 import { useRouter } from "next/router";
 import { useAuth } from "../components/AuthContext";
+import Logo from "../components/Logo";
 
 export default function StudentLogin() {
   const router = useRouter();
@@ -56,10 +57,9 @@ export default function StudentLogin() {
     <div className={styles.container}>
       <div className={styles.topBar}>
         <div className={styles.brand}>
-          <div className={styles.logoIcon}>VF</div>
+          <Logo size={42} />
           <div className={styles.brandText}>
             <h1>Vijeta Foundation</h1>
-            <p>Common Entrance Test — Online Mock Test System</p>
           </div>
         </div>
       </div>
