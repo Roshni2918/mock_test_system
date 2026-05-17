@@ -13,7 +13,7 @@ export default function Home() {
           {logoErr ? (
             <div className={styles.logoIcon}>VF</div>
           ) : (
-            <img src="/logo.jpeg" alt="Logo" className={styles.logoImg}
+            <img src="/logo.svg" alt="Logo" className={styles.logoImg}
               onError={() => setLogoErr(true)}
             />
           )}
