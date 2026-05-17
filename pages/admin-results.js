@@ -70,11 +70,12 @@ export default function AdminResults() {
   };
 
   const scoreRanges = [
-    { key: 'above90', label: 'Above 90%', check: (s, t) => t && (s / t) >= 0.9 },
-    { key: 'above80', label: 'Above 80%', check: (s, t) => t && (s / t) >= 0.8 },
-    { key: 'above50', label: 'Above 50%', check: (s, t) => t && (s / t) >= 0.5 },
-    { key: 'below20', label: 'Below 20%', check: (s, t) => t && (s / t) <= 0.2 },
-    { key: 'below10', label: 'Below 10%', check: (s, t) => t && (s / t) <= 0.1 },
+    { key: 'above40', label: 'Above 40', check: (s) => s >= 40 },
+    { key: 'above30', label: 'Above 30', check: (s) => s >= 30 },
+    { key: 'above20', label: 'Above 20', check: (s) => s >= 20 },
+    { key: 'above10', label: 'Above 10', check: (s) => s >= 10 },
+    { key: 'below10', label: 'Below 10', check: (s) => s <= 10 },
+    { key: 'below5', label: 'Below 5', check: (s) => s <= 5 },
   ];
 
   const handleExamFilter = (e) => {
@@ -100,7 +101,7 @@ export default function AdminResults() {
     if (scoreFilter) {
       const range = scoreRanges.find(r => r.key === scoreFilter);
       if (range) {
-        filtered = filtered.filter(r => range.check(r.score, r.total_questions));
+        filtered = filtered.filter(r => range.check(r.score));
       }
     }
     setFilteredResults(filtered);
@@ -200,7 +201,7 @@ export default function AdminResults() {
         <div className={styles.card} style={{ marginBottom: "20px", display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
           <span style={{ fontWeight: 600, fontSize: "0.85rem", color: "#475569" }}>Score:</span>
           {scoreRanges.map(range => {
-            const count = allResults.filter(r => range.check(r.score, r.total_questions)).length;
+            const count = allResults.filter(r => range.check(r.score)).length;
             return (
               <button
                 key={range.key}
