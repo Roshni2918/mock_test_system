@@ -225,6 +225,7 @@ async function handler(req, res) {
           const qr = await db.collection('questions').insertOne({
             exam_id: examId, section_name: section.name,
             question_text: q.text, section: section.name, question: q.text,
+            image_path: q.image_path || null,
             created_at: new Date()
           });
 

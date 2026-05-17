@@ -54,6 +54,7 @@ async function handler(req, res) {
       id: q._id,
       question: q.question_text || q.question,
       section: q.section_name || q.section,
+      image_path: q.image_path || null,
       options: optionsByQuestion[q._id.toString()] || []
     }));
 

@@ -1,7 +1,7 @@
 .examShell {
   display: flex;
   min-height: 100vh;
-  background: #eef2f7;
+  background: #f1f5f9;
   color: #0f172a;
 }
 
@@ -127,9 +127,10 @@
 
 .questionCard {
   background: #ffffff;
-  border-radius: 8px;
-  border: 1px solid #dbe2ea;
-  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
 .questionHead {
@@ -186,17 +187,19 @@
   border-radius: 10px;
   border: 2px solid #e2e8f0;
   background: #fff;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .optionLabel:hover {
   border-color: #93c5fd;
   background: #f0f7ff;
+  box-shadow: 0 1px 4px rgba(37,99,235,0.08);
 }
 
 .optionSelected {
-  background: #e6f3ff;
+  background: #eff6ff;
   border-color: #2563eb;
+  box-shadow: 0 1px 4px rgba(37,99,235,0.12);
 }
 
 .optionInput {
@@ -245,7 +248,17 @@
 .navButton {
   background: #2563eb;
   color: #fff;
-  padding: 10px 20px;
+  padding: 10px 22px;
+  transition: all 0.2s ease;
+}
+
+.navButton:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(37,99,235,0.25);
+  transform: translateY(-1px);
+}
+
+.navButton:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .navButton:disabled {
@@ -256,7 +269,13 @@
 .reviewButton {
   background: #f59e0b;
   color: #111827;
-  padding: 10px 14px;
+  padding: 10px 16px;
+  transition: all 0.2s ease;
+}
+
+.reviewButton:hover {
+  box-shadow: 0 4px 12px rgba(245,158,11,0.25);
+  transform: translateY(-1px);
 }
 
 .reviewActive {
@@ -268,20 +287,29 @@
   margin-left: auto;
   background: #16a34a;
   color: #fff;
-  padding: 10px 24px;
+  padding: 10px 26px;
+  transition: all 0.2s ease;
+}
+
+.submitButton:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(22,163,74,0.25);
+  transform: translateY(-1px);
 }
 
 .submitButton:disabled {
   background: #cbd5e1;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .navigator {
   width: 340px;
   background: #ffffff;
-  border-left: 1px solid #dbe2ea;
-  padding: 20px;
+  border-left: 1px solid #e2e8f0;
+  padding: 24px 20px;
   overflow-y: auto;
+  box-shadow: -2px 0 8px rgba(0,0,0,0.02);
 }
 
 .navigatorTitle {
@@ -324,15 +352,23 @@
 
 .qIndexButton {
   min-height: 40px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   font-weight: 700;
   cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 0.85rem;
+}
+
+.qIndexButton:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 1px 4px rgba(37,99,235,0.08);
 }
 
 .currentQuestion {
-  outline: 2px solid #0f172a;
+  outline: 2px solid #2563eb;
   outline-offset: 1px;
+  border-color: #2563eb;
 }
 
 .legend {
@@ -421,15 +457,17 @@
   width: 100%;
   max-width: 520px;
   background: #fff;
-  border-radius: 10px;
-  border: 1px solid #dbe2ea;
-  padding: 34px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 40px 34px;
   text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
 }
 
 .startTitle {
   margin: 0 0 12px;
   font-size: 28px;
+  color: #0f172a;
 }
 
 .startMeta {
@@ -439,17 +477,24 @@
 }
 
 .startNote {
-  margin: 16px 0 20px;
+  margin: 16px 0 24px;
   color: #64748b;
   font-size: 14px;
   font-style: italic;
 }
 
 .startButton {
-  background: #16a34a;
+  background: linear-gradient(135deg, #16a34a, #15803d);
   color: #fff;
   font-size: 17px;
-  padding: 12px 28px;
+  padding: 14px 32px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(22,163,74,0.25);
+}
+
+.startButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(22,163,74,0.3);
 }
 
 @media (max-width: 1024px) {

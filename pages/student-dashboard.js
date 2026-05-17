@@ -120,7 +120,7 @@ function StudentDashboardContent() {
 
         <div className={styles.card} style={{ marginBottom: "16px", background: "#eff6ff", borderColor: "#93c5fd" }}>
           <p style={{ fontSize: "0.88rem", color: "#1e40af" }}>
-            <strong>Note:</strong> Exam results are only visible to administrators. You can only see exams matching your assigned exam type ({user?.exam_type || "N/A"}) and batch ({user?.batch || "N/A"}).
+            <strong>Note:</strong> You can only see exams matching your assigned exam type <strong>({user?.exam_type || "N/A"})</strong> and batch <strong>({user?.batch || "N/A"})</strong>.
           </p>
         </div>
 

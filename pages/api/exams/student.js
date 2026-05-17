@@ -22,10 +22,10 @@ async function handler(req, res) {
   try {
     const { db } = await connectToDatabase();
 
-    // Filter exams by batch OR type (allow access if either matches)
+    // Filter exams by batch AND type (both must match)
     const exams = await db.collection('exams')
       .find({
-        $or: [
+        $and: [
           { batch: user.batch },
           { type: user.exam_type }
         ]

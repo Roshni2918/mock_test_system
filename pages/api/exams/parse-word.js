@@ -33,6 +33,30 @@ function extractImagesFromDocx(buffer) {
   });
 }
 
+async function extractQuestionImages(buffer) {
+  const map = {};
+  try {
+    const result = await mammoth.convertToHtml({
+      buffer,
+      convertImage: mammoth.images.dataUri()
+    });
+    const html = result.value || '';
+    const regex = /(?:<[^>]+>)*?([^<]*?)(?:<img[^>]+src="(data:[^"]+)"[^>]*>)/gi;
+    let currentQNum = null;
+    let m;
+    while ((m = regex.exec(html)) !== null) {
+      const textPart = (m[1] || '').trim();
+      const src = m[2];
+      const qMatch = textPart.match(/\(?(\d+)\)?[\.\)\]\s\t]/);
+      if (qMatch) currentQNum = parseInt(qMatch[1]);
+      if (src && currentQNum && !map[currentQNum]) {
+        map[currentQNum] = src;
+      }
+    }
+  } catch (e) { /* ignore */ }
+  return map;
+}
+
 async function ocrImages(images) {
   const texts = [];
   if (images.length === 0) return texts;
@@ -383,6 +407,9 @@ async function handler(req, res) {
     // Extract answer key from HTML tables (more reliable than text extraction for table content)
     const htmlAnswerMap = extractAnswerKeyFromHtml(htmlContent);
 
+    // Extract images from docx and link to questions
+    const questionImages = await extractQuestionImages(file.buffer);
+
     try {
       const images = await extractImagesFromDocx(file.buffer);
       if (images.length > 0) {
@@ -392,6 +419,18 @@ async function handler(req, res) {
     } catch (e) { /* skip */ }
 
     const sections = universalParse(content, htmlAnswerMap);
+
+    // Link images to questions by question number
+    if (Object.keys(questionImages).length > 0) {
+      for (const section of sections) {
+        for (const q of section.questions) {
+          if (questionImages[q.number]) {
+            q.image_path = questionImages[q.number];
+          }
+        }
+      }
+    }
+
     const totalQuestions = sections.reduce((sum, s) => sum + s.questions.length, 0);
 
     // Build debug answer map from HTML-extracted answers, supplemented by text extraction
@@ -417,7 +456,8 @@ async function handler(req, res) {
           number: q.number,
           text: q.text,
           options: q.options.map(o => ({ letter: o.letter, text: o.text })),
-          answer: q.answer || null
+          answer: q.answer || null,
+          image_path: q.image_path || null
         }))
       })),
       hasOcr: ocrTexts.length > 0,
