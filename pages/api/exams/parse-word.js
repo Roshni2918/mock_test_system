@@ -55,22 +55,19 @@ function universalParse(content) {
   // Extract answer map by scanning entire content for answer key table patterns
   const answerMap = {};
   const allLines = content.split('\n');
-  // First pass: detect table header and extract pairs
   let inTable = false;
   for (const rawLine of allLines) {
     const line = rawLine.trim();
-    if (!line) { continue; }
+    if (!line) continue;
     if (!inTable) {
       if (/question\s*no/i.test(line) || /q\.?\s*no/i.test(line)) { inTable = true; }
       continue;
     }
-    // Extract ALL (question_no, answer) pairs — handles two-column layout
     const pairs = [...line.matchAll(/(\d+)\s+([A-Da-d1-4])/g)];
     if (pairs.length > 0) {
       for (const p of pairs) answerMap[parseInt(p[1])] = p[2];
     }
   }
-  // Second pass: if no table found, try inline format on all lines
   if (Object.keys(answerMap).length === 0) {
     for (const rawLine of allLines) {
       const line = rawLine.trim();
@@ -80,108 +77,99 @@ function universalParse(content) {
     }
   }
 
-  // Now split content at answer key header for question parsing
+  // Split content at answer key header
   const ansKeyPattern = /^[\s]*(?:(?:\d+[\s(]*)?(?:paper|set|section|part)\s*[-:.\s]+\s*)?\d*[\s(]*(?:answer\s*(?:key|sheet)|ans\s*(?:key|sheet)|उत्तर\s*(?:सूची|कुंजी|माला))[:\s()]*$/im;
   const m = content.match(ansKeyPattern);
-  const splitIndex = m ? m.index : content.length;
-  const questionsPart = content.substring(0, splitIndex).trim();
+  const questionsPart = m ? content.substring(0, m.index).trim() : content.trim();
 
-  const lines = questionsPart.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   const sections = [];
   let currentSection = { name: 'General', questions: [] };
   sections.push(currentSection);
-  let currentQuestion = null;
-  let headerMode = true;
   const numToLetter = { '1': 'A', '2': 'B', '3': 'C', '4': 'D' };
 
-  for (const line of lines) {
-    if (/^(section|topic|chapter|unit|part|subject|paper)\s*[-:.\s]/i.test(line)) {
-      if (currentQuestion && currentQuestion.options.length > 0) currentSection.questions.push(currentQuestion);
-      currentQuestion = null;
-      currentSection = { name: line.replace(/^(section|topic|chapter|unit|part|subject|paper)\s*[-:.\s]*/i, '').trim(), questions: [] };
+  // 1st pass: accumulate all text lines (non-option, non-section) into currentSection.textBuffer
+  // so text preceding questions doesn't create phantom questions
+  // Paragraph-based parsing: split by blank lines
+  const paragraphs = questionsPart.split(/\n\s*\n/).filter(p => p.trim().length > 5);
+
+  for (const para of paragraphs) {
+    const lines = para.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    if (lines.length === 0) continue;
+
+    const firstLine = lines[0];
+
+    // Section header
+    if (/^(section|topic|chapter|unit|part|subject|paper)\s*[-:.\s]/i.test(firstLine)) {
+      currentSection = { name: firstLine.replace(/^(section|topic|chapter|unit|part|subject|paper)\s*[-:.\s]*/i, '').trim(), questions: [] };
       sections.push(currentSection);
       continue;
     }
 
-    // Extract ALL options from the line (handles "1) opt1\t2) opt2\t3) opt3\t4) opt4")
-    // Use negative lookbehind so digits inside text (e.g., "अनुच्छेद 14") aren't matched as option markers
-    const opts = [...line.matchAll(/\(?([1-4A-Da-d])\)?[\.\)\s]+\s*(.*?)(?=\s*\(?(?<!\d)[1-4A-Da-d]\)?[\.\)\s]|\s*$)/g)];
-    if (opts.length > 0 && currentQuestion && currentQuestion.options.length < 4) {
-      let anyAdded = false;
-      for (const o of opts) {
-        if (currentQuestion.options.length >= 4) break;
-        const text = o[2].trim();
-        if (!text) continue;
-        const raw = o[1].toUpperCase();
-        const letter = numToLetter[raw] || raw;
-        currentQuestion.options.push({ letter, text });
-        anyAdded = true;
+    // Find all question-start lines within this paragraph
+    const qStarts = [];
+    for (let i = 0; i < lines.length; i++) {
+      if (/^\(?(\d+)\)?[\.\)\]\s\t]+\s*.{3,}/.test(lines[i])) {
+        qStarts.push(i);
       }
-      if (anyAdded) continue;
     }
 
-    const ansMatch = line.match(/^(?:answer|ans|correct|key|right|उत्तर)\s*[:=]?\s*\(?([A-Da-d1-4])\)?/i);
-    if (ansMatch && currentQuestion) {
-      currentQuestion.answer = numToLetter[ansMatch[1].toUpperCase()] || ansMatch[1].toUpperCase();
-      continue;
-    }
+    if (qStarts.length === 0) continue;
 
-    if (/^[1-4][\.\)\s]/.test(line) && !currentQuestion) continue;
+    // Process each question block within the paragraph
+    for (let qi = 0; qi < qStarts.length; qi++) {
+      const start = qStarts[qi];
+      const end = qi + 1 < qStarts.length ? qStarts[qi + 1] : lines.length;
+      const block = lines.slice(start, end);
 
-    const qMatch = line.match(/^\(?(\d+)\)?[\.\)\]\s\t]+\s*(.+)/);
-    if (qMatch) {
-      headerMode = false;
-      if (currentQuestion && currentQuestion.options.length > 0) currentSection.questions.push(currentQuestion);
-      currentQuestion = {
-        number: parseInt(qMatch[1]),
-        text: qMatch[2],
-        options: [],
-        answer: answerMap[parseInt(qMatch[1])] ? numToLetter[answerMap[parseInt(qMatch[1])]] || answerMap[parseInt(qMatch[1])] : null
-      };
-      continue;
-    }
+      const qMatch = block[0].match(/^\(?(\d+)\)?[\.\)\]\s\t]+\s*(.+)/);
+      if (!qMatch) continue;
+      const qNum = parseInt(qMatch[1]);
+      let qText = qMatch[2];
 
-    if (!currentQuestion && line.length > 10) {
-      headerMode = false;
-      const qNum = sections.reduce((s, sec) => s + sec.questions.length, 0) + 1;
-      currentQuestion = { number: qNum, text: line, options: [], answer: answerMap[qNum] ? numToLetter[answerMap[qNum]] || answerMap[qNum] : null };
-      continue;
-    }
+      const options = [];
+      for (let i = 1; i < block.length; i++) {
+        const optMatches = [...block[i].matchAll(/\(?([1-4A-Da-d])\)?[\.\)\s]+\s*(.*?)(?=\s*\(?(?<!\d)[1-4A-Da-d]\)?[\.\)\s]|\s*$)/g)];
+        if (optMatches.length > 0) {
+          for (const om of optMatches) {
+            const txt = om[2].trim();
+            if (!txt) continue;
+            const raw = om[1].toUpperCase();
+            const letter = numToLetter[raw] || raw;
+            if (!options.some(o => o.letter === letter)) {
+              options.push({ letter, text: txt });
+            }
+            if (options.length >= 4) break;
+          }
+        } else {
+          qText += ' ' + block[i];
+        }
+      }
 
-    if (currentQuestion && currentQuestion.options.length === 0) {
-      currentQuestion.text += ' ' + line;
+      // Also check first line for inline options (e.g., "1. X? A) opt1 B) opt2")
+      if (options.length < 2) {
+        const inlineOpts = [...block[0].matchAll(/(?<=\s|^)\(?([1-4A-Da-d])\)?[\.\)\s]+\s*(.{2,}?)(?=\s*\(?(?<!\d)[1-4A-Da-d]\)?[\.\)\s]|\s*$)/g)];
+        for (const io of inlineOpts) {
+          const raw = io[1].toUpperCase();
+          const letter = numToLetter[raw] || raw;
+          if (!options.some(o => o.letter === letter)) {
+            options.push({ letter, text: io[2].trim() });
+          }
+        }
+      }
+
+      if (options.length >= 2 && qNum) {
+        const answer = answerMap[qNum] ? numToLetter[answerMap[qNum]] || answerMap[qNum] : null;
+        currentSection.questions.push({
+          number: qNum,
+          text: qText.replace(/^\d+[\.\)\]\s\t]+\s*/, '').trim(),
+          options,
+          answer
+        });
+      }
     }
   }
 
-  if (currentQuestion && currentQuestion.options.length > 0) currentSection.questions.push(currentQuestion);
-
-  if (sections.every(s => s.questions.length === 0)) {
-    const paragraphs = questionsPart.split(/\n\s*\n/).filter(p => p.trim().length > 15);
-    const sec = { name: 'General', questions: [] };
-    const result = [];
-    for (const para of paragraphs) {
-      const pLines = para.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-      if (pLines.length < 2) continue;
-      const opts = [];
-      let qText = '';
-      let ans = '';
-      for (const pl of pLines) {
-        const oo = [...pl.matchAll(/\(?([1-4A-Da-d])\)?[\.\)\s]+\s*(.*?)(?=\s*\(?(?<!\d)[1-4A-Da-d]\)?[\.\)\s]|\s*$)/g)];
-        if (oo.length > 0) { for (const o of oo) { const t = o[2].trim(); if (!t) continue; const raw = o[1].toUpperCase(); opts.push({ letter: numToLetter[raw] || raw, text: t }); } continue; }
-        const a = pl.match(/^(?:answer|ans|correct|उत्तर)[\s:=]+\(?([A-Da-d1-4])\)?/i);
-        if (a) { ans = numToLetter[a[1].toUpperCase()] || a[1].toUpperCase(); continue; }
-        qText += (qText ? ' ' : '') + pl;
-      }
-      if (qText && opts.length >= 2) {
-        const qNum = result.length + 1;
-        const matchedAnswer = ans || (answerMap[qNum] ? numToLetter[answerMap[qNum]] || answerMap[qNum] : null);
-        sec.questions.push({ number: qNum, text: qText.replace(/^\d+[\.\)\]\s\t]+\s*/, '').trim(), options: opts, answer: matchedAnswer || null });
-      }
-    }
-    if (sec.questions.length > 0) result.push(sec);
-    return result.length > 0 ? result : [];
-  }
-
+  // Return questions even if only 1 section
   return sections;
 }
 
