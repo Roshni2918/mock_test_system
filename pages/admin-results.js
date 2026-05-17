@@ -9,6 +9,7 @@ export default function AdminResults() {
   const [selectedExam, setSelectedExam] = useState("");
   const [selectedExamType, setSelectedExamType] = useState("");
   const [filteredResults, setFilteredResults] = useState([]);
+  const [scoreFilter, setScoreFilter] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedResultDetails, setSelectedResultDetails] = useState(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
@@ -68,28 +69,42 @@ export default function AdminResults() {
     }
   };
 
+  const scoreRanges = [
+    { key: 'above90', label: 'Above 90%', check: (s, t) => t && (s / t) >= 0.9 },
+    { key: 'above80', label: 'Above 80%', check: (s, t) => t && (s / t) >= 0.8 },
+    { key: 'above50', label: 'Above 50%', check: (s, t) => t && (s / t) >= 0.5 },
+    { key: 'below20', label: 'Below 20%', check: (s, t) => t && (s / t) <= 0.2 },
+    { key: 'below10', label: 'Below 10%', check: (s, t) => t && (s / t) <= 0.1 },
+  ];
+
   const handleExamFilter = (e) => {
-    const examId = e.target.value;
-    setSelectedExam(examId);
-    applyFilters(examId, selectedExamType);
+    setSelectedExam(e.target.value);
   };
 
   const handleExamTypeFilter = (e) => {
-    const examType = e.target.value;
-    setSelectedExamType(examType);
-    applyFilters(selectedExam, examType);
+    setSelectedExamType(e.target.value);
   };
 
-  const applyFilters = (examId, examType) => {
+  const handleScoreFilter = (key) => {
+    setScoreFilter(prev => prev === key ? null : key);
+  };
+
+  useEffect(() => {
     let filtered = allResults;
-    if (examId) {
-      filtered = filtered.filter(r => r.exam_id && r.exam_id.toString() === examId.toString());
+    if (selectedExam) {
+      filtered = filtered.filter(r => r.exam_id && r.exam_id.toString() === selectedExam.toString());
     }
-    if (examType) {
-      filtered = filtered.filter(r => r.exam_type === examType);
+    if (selectedExamType) {
+      filtered = filtered.filter(r => r.exam_type === selectedExamType);
+    }
+    if (scoreFilter) {
+      const range = scoreRanges.find(r => r.key === scoreFilter);
+      if (range) {
+        filtered = filtered.filter(r => range.check(r.score, r.total_questions));
+      }
     }
     setFilteredResults(filtered);
-  };
+  }, [allResults, selectedExam, selectedExamType, scoreFilter]);
 
   const calculateStats = () => {
     if (filteredResults.length === 0) return { avg: 0, highest: 0, lowest: 0 };
@@ -180,6 +195,63 @@ export default function AdminResults() {
           <span style={{ color: "#64748b", fontSize: "0.85rem", marginLeft: "auto" }}>
             Showing {filteredResults.length} of {allResults.length} results
           </span>
+        </div>
+
+        <div className={styles.card} style={{ marginBottom: "20px", display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+          <span style={{ fontWeight: 600, fontSize: "0.85rem", color: "#475569" }}>Score:</span>
+          {scoreRanges.map(range => {
+            const count = allResults.filter(r => range.check(r.score, r.total_questions)).length;
+            return (
+              <button
+                key={range.key}
+                onClick={() => handleScoreFilter(range.key)}
+                style={{
+                  padding: "6px 14px",
+                  borderRadius: "8px",
+                  border: scoreFilter === range.key ? "2px solid #2563eb" : "1px solid #dbe2ea",
+                  background: scoreFilter === range.key ? "#eff6ff" : "#fff",
+                  color: scoreFilter === range.key ? "#2563eb" : "#475569",
+                  fontWeight: scoreFilter === range.key ? 700 : 500,
+                  fontSize: "0.85rem",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontFamily: "inherit"
+                }}
+              >
+                {range.label}
+                <span style={{
+                  fontSize: "0.75rem",
+                  fontWeight: 700,
+                  background: scoreFilter === range.key ? "#dbeafe" : "#e2e8f0",
+                  color: scoreFilter === range.key ? "#1d4ed8" : "#334155",
+                  borderRadius: "999px",
+                  padding: "1px 7px",
+                }}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+          {scoreFilter && (
+            <button
+              onClick={() => setScoreFilter(null)}
+              style={{
+                padding: "6px 12px",
+                borderRadius: "8px",
+                border: "1px solid #e2e8f0",
+                background: "#fff",
+                color: "#64748b",
+                fontSize: "0.82rem",
+                cursor: "pointer",
+                fontFamily: "inherit"
+              }}
+            >
+              Clear
+            </button>
+          )}
         </div>
 
         {filteredResults.length > 0 ? (
