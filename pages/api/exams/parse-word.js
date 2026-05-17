@@ -251,7 +251,8 @@ async function handler(req, res) {
         answerMapSample: Object.fromEntries(Object.entries(answerMap).slice(0, 5)),
         answerMap: answerMap,
         linesTotal: content.split('\n').length,
-        contentPreview: content.substring(0, 300)
+        foundQuestionNumbers: sections.flatMap(s => s.questions.map(q => q.number)),
+        contentPreview: content.substring(0, 500)
       }
     });
   } catch (error) {
