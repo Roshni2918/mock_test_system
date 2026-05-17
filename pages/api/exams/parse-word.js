@@ -106,11 +106,17 @@ function universalParse(content) {
     }
 
     // Find all question-start lines within this paragraph
+    // Must NOT match option lines (1) opt\t2) opt\t3) opt\t4) opt)
     const qStarts = [];
     for (let i = 0; i < lines.length; i++) {
-      if (/^\(?(\d+)\)?[\.\)\]\s\t]+\s*.{3,}/.test(lines[i])) {
-        qStarts.push(i);
+      const qStartMatch = lines[i].match(/^\(?(\d+)\)?[\.\)\]\s\t]+\s*.{3,}/);
+      if (!qStartMatch) continue;
+      // Skip option lines: start with 1-4 AND have another option marker later on the same line
+      const firstNum = parseInt(qStartMatch[1]);
+      if (firstNum >= 1 && firstNum <= 4 && /\(?[1-4A-Da-d]\)?[\.\)\s]/.test(lines[i].slice(3))) {
+        continue;
       }
+      qStarts.push(i);
     }
 
     if (qStarts.length === 0) continue;
