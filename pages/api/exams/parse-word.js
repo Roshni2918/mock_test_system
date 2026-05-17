@@ -82,100 +82,112 @@ function universalParse(content) {
   const m = content.match(ansKeyPattern);
   const questionsPart = m ? content.substring(0, m.index).trim() : content.trim();
 
+  const lines = questionsPart.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   const sections = [];
   let currentSection = { name: 'General', questions: [] };
   sections.push(currentSection);
+  let currentQuestion = null;
   const numToLetter = { '1': 'A', '2': 'B', '3': 'C', '4': 'D' };
 
-  // 1st pass: accumulate all text lines (non-option, non-section) into currentSection.textBuffer
-  // so text preceding questions doesn't create phantom questions
-  // Paragraph-based parsing: split by blank lines
-  const paragraphs = questionsPart.split(/\n\s*\n/).filter(p => p.trim().length > 5);
-
-  for (const para of paragraphs) {
-    const lines = para.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    if (lines.length === 0) continue;
-
-    const firstLine = lines[0];
-
-    // Section header
-    if (/^(section|topic|chapter|unit|part|subject|paper)\s*[-:.\s]/i.test(firstLine)) {
-      currentSection = { name: firstLine.replace(/^(section|topic|chapter|unit|part|subject|paper)\s*[-:.\s]*/i, '').trim(), questions: [] };
+  for (const line of lines) {
+    // Section header detection
+    if (/^(section|topic|chapter|unit|part|subject|paper)\s*[-:.\s]/i.test(line)) {
+      if (currentQuestion && currentQuestion.options.length > 0) currentSection.questions.push(currentQuestion);
+      currentQuestion = null;
+      currentSection = { name: line.replace(/^(section|topic|chapter|unit|part|subject|paper)\s*[-:.\s]*/i, '').trim(), questions: [] };
       sections.push(currentSection);
       continue;
     }
 
-    // Find all question-start lines within this paragraph
-    // Must NOT match option lines (1) opt\t2) opt\t3) opt\t4) opt)
-    const qStarts = [];
-    for (let i = 0; i < lines.length; i++) {
-      const qStartMatch = lines[i].match(/^\(?(\d+)\)?[\.\)\]\s\t]+\s*.{3,}/);
-      if (!qStartMatch) continue;
-      // Skip option lines: start with 1-4 AND have another option marker later on the same line
-      const firstNum = parseInt(qStartMatch[1]);
-      if (firstNum >= 1 && firstNum <= 4 && /\(?[1-4A-Da-d]\)?[\.\)\s]/.test(lines[i].slice(3))) {
-        continue;
+    // Try to extract options (e.g., "1) opt1\t2) opt2\t3) opt3\t4) opt4")
+    const opts = [...line.matchAll(/\(?([1-4A-Da-d])\)?[\.\)\s]+\s*(.*?)(?=\s*\(?(?<!\d)[1-4A-Da-d]\)?[\.\)\s]|\s*$)/g)];
+    if (opts.length > 0 && currentQuestion && currentQuestion.options.length < 4) {
+      let anyAdded = false;
+      for (const o of opts) {
+        if (currentQuestion.options.length >= 4) break;
+        const text = o[2].trim();
+        if (!text) continue;
+        // Check that this option label doesn't duplicate an existing one
+        const raw = o[1].toUpperCase();
+        const letter = numToLetter[raw] || raw;
+        if (!currentQuestion.options.some(ex => ex.letter === letter)) {
+          currentQuestion.options.push({ letter, text });
+          anyAdded = true;
+        }
       }
-      qStarts.push(i);
+      if (anyAdded) continue;
     }
 
-    if (qStarts.length === 0) continue;
+    // Inline answer match (e.g., "Answer: A", "उत्तर : 2")
+    const ansMatch = line.match(/^(?:answer|ans|correct|key|right|उत्तर)\s*[:=]?\s*\(?([A-Da-d1-4])\)?/i);
+    if (ansMatch && currentQuestion) {
+      currentQuestion.answer = numToLetter[ansMatch[1].toUpperCase()] || ansMatch[1].toUpperCase();
+      continue;
+    }
 
-    // Process each question block within the paragraph
-    for (let qi = 0; qi < qStarts.length; qi++) {
-      const start = qStarts[qi];
-      const end = qi + 1 < qStarts.length ? qStarts[qi + 1] : lines.length;
-      const block = lines.slice(start, end);
+    // Skip orphan option lines (when no current question exists)
+    // Only match if line starts with 1-4 followed by ) or . (e.g., "1) text", "1. text")
+    // NOT "1\ttext" (which is a legitimate question 1)
+    if (/^[1-4][\.\)]/.test(line) && !currentQuestion) continue;
 
-      const qMatch = block[0].match(/^\(?(\d+)\)?[\.\)\]\s\t]+\s*(.+)/);
-      if (!qMatch) continue;
+    // Question match: "1\ttext", "1. text", "1) text", etc.
+    const qMatch = line.match(/^\(?(\d+)\)?[\.\)\]\s\t]+\s*(.+)/);
+    if (qMatch) {
+      // IMPORTANT: Skip if this is actually an option line (number 1-4 followed by short content with more options)
+      // e.g., "1) opt1\t2) opt2..." should not create a new question
       const qNum = parseInt(qMatch[1]);
-      let qText = qMatch[2];
-
-      const options = [];
-      for (let i = 1; i < block.length; i++) {
-        const optMatches = [...block[i].matchAll(/\(?([1-4A-Da-d])\)?[\.\)\s]+\s*(.*?)(?=\s*\(?(?<!\d)[1-4A-Da-d]\)?[\.\)\s]|\s*$)/g)];
-        if (optMatches.length > 0) {
-          for (const om of optMatches) {
-            const txt = om[2].trim();
-            if (!txt) continue;
-            const raw = om[1].toUpperCase();
-            const letter = numToLetter[raw] || raw;
-            if (!options.some(o => o.letter === letter)) {
-              options.push({ letter, text: txt });
-            }
-            if (options.length >= 4) break;
-          }
-        } else {
-          qText += ' ' + block[i];
-        }
+      if (qNum >= 1 && qNum <= 4 && opts.length > 0) {
+        // This is an options line being misidentified as a question
+        continue;
       }
+      if (currentQuestion && currentQuestion.options.length > 0) currentSection.questions.push(currentQuestion);
+      currentQuestion = {
+        number: qNum,
+        text: qMatch[2],
+        options: [],
+        answer: answerMap[qNum] ? numToLetter[answerMap[qNum]] || answerMap[qNum] : null
+      };
+      continue;
+    }
 
-      // Also check first line for inline options (e.g., "1. X? A) opt1 B) opt2")
-      if (options.length < 2) {
-        const inlineOpts = [...block[0].matchAll(/(?<=\s|^)\(?([1-4A-Da-d])\)?[\.\)\s]+\s*(.{2,}?)(?=\s*\(?(?<!\d)[1-4A-Da-d]\)?[\.\)\s]|\s*$)/g)];
-        for (const io of inlineOpts) {
-          const raw = io[1].toUpperCase();
-          const letter = numToLetter[raw] || raw;
-          if (!options.some(o => o.letter === letter)) {
-            options.push({ letter, text: io[2].trim() });
-          }
-        }
+    // Append text to current question if it has no options yet
+    if (!currentQuestion && line.length > 10) {
+      const qNum = sections.reduce((s, sec) => s + sec.questions.length, 0) + 1;
+      currentQuestion = { number: qNum, text: line, options: [], answer: answerMap[qNum] ? numToLetter[answerMap[qNum]] || answerMap[qNum] : null };
+      continue;
+    }
+
+    if (currentQuestion && currentQuestion.options.length === 0) {
+      currentQuestion.text += ' ' + line;
+    }
+  }
+
+  if (currentQuestion && currentQuestion.options.length > 0) currentSection.questions.push(currentQuestion);
+
+  // Fallback: if no questions found via line-by-line, try paragraph-based
+  if (sections.every(s => s.questions.length === 0)) {
+    const paragraphs = questionsPart.split(/\n\s*\n/).filter(p => p.trim().length > 15);
+    for (const para of paragraphs) {
+      const pLines = para.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      if (pLines.length < 2) continue;
+      const optLines = [];
+      let qText = '';
+      let ans = '';
+      for (const pl of pLines) {
+        const oo = [...pl.matchAll(/\(?([1-4A-Da-d])\)?[\.\)\s]+\s*(.*?)(?=\s*\(?(?<!\d)[1-4A-Da-d]\)?[\.\)\s]|\s*$)/g)];
+        if (oo.length > 0) { for (const o of oo) { const t = o[2].trim(); if (!t) continue; const raw = o[1].toUpperCase(); optLines.push({ letter: numToLetter[raw] || raw, text: t }); } continue; }
+        const a = pl.match(/^(?:answer|ans|correct|उत्तर)[\s:=]+\(?([A-Da-d1-4])\)?/i);
+        if (a) { ans = numToLetter[a[1].toUpperCase()] || a[1].toUpperCase(); continue; }
+        qText += (qText ? ' ' : '') + pl;
       }
-
-      if (options.length >= 2 && qNum) {
-        const answer = answerMap[qNum] ? numToLetter[answerMap[qNum]] || answerMap[qNum] : null;
-        currentSection.questions.push({
-          number: qNum,
-          text: qText.replace(/^\d+[\.\)\]\s\t]+\s*/, '').trim(),
-          options,
-          answer
-        });
+      if (qText && optLines.length >= 2) {
+        const qNum = sections.reduce((s, sec) => s + sec.questions.length, 0) + 1;
+        const matchedAnswer = ans || (answerMap[qNum] ? numToLetter[answerMap[qNum]] || answerMap[qNum] : null);
+        currentSection.questions.push({ number: qNum, text: qText.replace(/^\d+[\.\)\]\s\t]+\s*/, '').trim(), options: optLines, answer: matchedAnswer || null });
       }
     }
   }
 
-  // Return questions even if only 1 section
   return sections;
 }
 
