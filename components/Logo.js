@@ -12,7 +12,7 @@ export default function Logo({ size = 36, style: extraStyle = {}, admin = false 
     );
   }
   return (
-    <img src="/logo.jpeg" alt="Logo" style={{ ...base, objectFit: "contain", ...extraStyle }}
+    <img src="/logo.png" alt="Logo" style={{ ...base, objectFit: "contain", ...extraStyle }}
       onError={() => setErr(true)}
     />
   );
