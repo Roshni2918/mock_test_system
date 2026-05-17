@@ -219,7 +219,19 @@ export default function ExamPage() {
     );
   }
 
+  // Group questions by section
+  const sectionList = (() => {
+    const map = {};
+    questions.forEach((q, i) => {
+      const key = q.section || 'General';
+      if (!map[key]) map[key] = { name: key, startIndex: i, count: 0 };
+      map[key].count++;
+    });
+    return Object.values(map);
+  })();
+
   const currentQuestion = questions[currentQ];
+  const currentSection = sectionList.find(s => currentQ >= s.startIndex && currentQ < s.startIndex + s.count);
   const answeredCount = Object.keys(answers).length;
   const reviewCount = Object.values(reviewMap).filter(Boolean).length;
   const notAttemptedCount = questions.length - answeredCount;
@@ -243,12 +255,32 @@ export default function ExamPage() {
           Question {currentQ + 1} of {questions.length} | Answered: {answeredCount}
         </p>
 
+        {sectionList.length > 1 && (
+          <div className={styles.sectionBar}>
+            {sectionList.map((sec) => (
+              <button
+                key={sec.name}
+                onClick={() => setCurrentQ(sec.startIndex)}
+                className={`${styles.sectionTab} ${currentSection?.name === sec.name ? styles.sectionTabActive : ''}`}
+              >
+                {sec.name}
+                <span className={styles.sectionCount}>{sec.count}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className={styles.questionCard}>
           <div className={styles.questionHead}>
             <h3 className={styles.questionTitle}>{currentQuestion.question}</h3>
-            <span className={`${styles.statusPill} ${styles[`status${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}`]}`}>
-              {currentStatus === "answeredReview" ? "Answered & Review" : currentStatus === "notAttempted" ? "Not Attempted" : currentStatus === "review" ? "Review" : "Answered"}
-            </span>
+            <div className={styles.questionHeadRight}>
+              {currentSection && sectionList.length > 1 && (
+                <span className={styles.sectionLabel}>{currentSection.name}</span>
+              )}
+              <span className={`${styles.statusPill} ${styles[`status${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}`]}`}>
+                {currentStatus === "answeredReview" ? "Answered & Review" : currentStatus === "notAttempted" ? "Not Attempted" : currentStatus === "review" ? "Review" : "Answered"}
+              </span>
+            </div>
           </div>
           
           {currentQuestion.image_path && (
