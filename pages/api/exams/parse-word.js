@@ -107,13 +107,17 @@ function universalParse(content) {
     // Use negative lookbehind so digits inside text (e.g., "अनुच्छेद 14") aren't matched as option markers
     const opts = [...line.matchAll(/\(?([1-4A-Da-d])\)?[\.\)\s]+\s*(.*?)(?=\s*\(?(?<!\d)[1-4A-Da-d]\)?[\.\)\s]|\s*$)/g)];
     if (opts.length > 0 && currentQuestion && currentQuestion.options.length < 4) {
+      let anyAdded = false;
       for (const o of opts) {
         if (currentQuestion.options.length >= 4) break;
+        const text = o[2].trim();
+        if (!text) continue;
         const raw = o[1].toUpperCase();
         const letter = numToLetter[raw] || raw;
-        currentQuestion.options.push({ letter, text: o[2].trim() });
+        currentQuestion.options.push({ letter, text });
+        anyAdded = true;
       }
-      continue;
+      if (anyAdded) continue;
     }
 
     const ansMatch = line.match(/^(?:answer|ans|correct|key|right|उत्तर)\s*[:=]?\s*\(?([A-Da-d1-4])\)?/i);
@@ -163,7 +167,7 @@ function universalParse(content) {
       let ans = '';
       for (const pl of pLines) {
         const oo = [...pl.matchAll(/\(?([1-4A-Da-d])\)?[\.\)\s]+\s*(.*?)(?=\s*\(?(?<!\d)[1-4A-Da-d]\)?[\.\)\s]|\s*$)/g)];
-        if (oo.length > 0) { for (const o of oo) { const raw = o[1].toUpperCase(); opts.push({ letter: numToLetter[raw] || raw, text: o[2].trim() }); } continue; }
+        if (oo.length > 0) { for (const o of oo) { const t = o[2].trim(); if (!t) continue; const raw = o[1].toUpperCase(); opts.push({ letter: numToLetter[raw] || raw, text: t }); } continue; }
         const a = pl.match(/^(?:answer|ans|correct|उत्तर)[\s:=]+\(?([A-Da-d1-4])\)?/i);
         if (a) { ans = numToLetter[a[1].toUpperCase()] || a[1].toUpperCase(); continue; }
         qText += (qText ? ' ' : '') + pl;
@@ -222,7 +226,6 @@ async function handler(req, res) {
       const pairs = [...line.matchAll(/(\d+)\s+([A-Da-d1-4])/g)];
       if (pairs.length > 0) {
         for (const p of pairs) answerMap[parseInt(p[1])] = p[2];
-        break; // first data row is sufficient for debug sample
       }
     }
     if (Object.keys(answerMap).length === 0) {
@@ -252,6 +255,7 @@ async function handler(req, res) {
       _debug: {
         answerMapSize: Object.keys(answerMap).length,
         answerMapSample: Object.fromEntries(Object.entries(answerMap).slice(0, 5)),
+        answerMap: answerMap,
         linesTotal: content.split('\n').length,
         contentPreview: content.substring(0, 300)
       }
