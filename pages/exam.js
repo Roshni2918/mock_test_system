@@ -8,6 +8,14 @@ export default function ExamPage() {
   const { user } = useAuth();
   const { id: examId } = router.query;
 
+  function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
   const [questions, setQuestions] = useState([]);
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -158,7 +166,11 @@ export default function ExamPage() {
       if (!response.ok) {
         throw new Error(data?.message || "Failed to load exam questions");
       }
-      setQuestions(data);
+      const shuffled = shuffleArray([...data]);
+      shuffled.forEach(q => {
+        if (q.options) q.options = shuffleArray([...q.options]);
+      });
+      setQuestions(shuffled);
     } catch (error) {
       console.error("Error fetching questions:", error);
       throw error;
