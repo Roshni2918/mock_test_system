@@ -264,6 +264,7 @@ export default function AdminResults() {
                   <th>Exam Name</th>
                   <th>Exam Type</th>
                   <th>Score</th>
+                  <th>Neg. Mark</th>
                   <th>Time Taken</th>
                   <th>Tab Switches</th>
                   <th>Status</th>
@@ -278,6 +279,9 @@ export default function AdminResults() {
                     <td>{result.exam_name}</td>
                     <td>{result.exam_type ? <span className={`${styles.badge} ${styles.badgeInfo}`}>{result.exam_type}</span> : '—'}</td>
                     <td style={{ fontWeight: 700, color: result.score >= 5 ? "#16a34a" : "#dc2626" }}>{result.score}</td>
+                    <td style={{ fontSize: "0.82rem", color: result.negative_marking ? "#dc2626" : "#94a3b8" }}>
+                      {result.negative_marking ? `-${result.negative_marking}` : '—'}
+                    </td>
                     <td>{Math.round(result.time_taken / 60)} min</td>
                     <td>
                       {result.tab_switches > 0 ? (
@@ -335,6 +339,9 @@ export default function AdminResults() {
               <p><strong>Student:</strong> {selectedResultDetails.result.student_name} ({selectedResultDetails.result.student_email})</p>
               <p><strong>Exam:</strong> {selectedResultDetails.result.exam_name} ({selectedResultDetails.result.exam_type} / {selectedResultDetails.result.exam_batch})</p>
               <p><strong>Score:</strong> {selectedResultDetails.result.score}</p>
+              {selectedResultDetails.result.negative_marking ? (
+                <p><strong>Negative Marking:</strong> <span style={{ color: '#dc2626' }}>-{selectedResultDetails.result.negative_marking} per wrong answer</span></p>
+              ) : null}
               <p><strong>Tab Switches:</strong> <span style={{ color: selectedResultDetails.result.tab_switches >= 3 ? '#dc2626' : '#475569', fontWeight: 700 }}>{selectedResultDetails.result.tab_switches || 0}</span></p>
               <p><strong>Submitted At:</strong> {new Date(selectedResultDetails.result.submitted_at).toLocaleString()}</p>
             </div>

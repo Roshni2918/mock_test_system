@@ -171,7 +171,7 @@ async function handler(req, res) {
     await runMiddleware(req, res, upload.single('examFile'));
     const file = req.file;
 
-    const { name, type, batch, duration, scheduled_date, questions } = req.body;
+    const { name, type, batch, duration, scheduled_date, negative_marking, questions } = req.body;
     if (!name || !type || !batch || !duration || !scheduled_date) {
       return res.status(400).json({ message: 'Please fill all required fields' });
     }
@@ -211,6 +211,7 @@ async function handler(req, res) {
     const examResult = await db.collection('exams').insertOne({
       name, type, batch, duration: parseInt(duration, 10),
       scheduled_time: new Date(scheduled_date),
+      negative_marking: parseFloat(negative_marking) || 0,
       total_questions: 0, created_at: new Date()
     });
 

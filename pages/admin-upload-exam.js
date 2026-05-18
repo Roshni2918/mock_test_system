@@ -11,6 +11,7 @@ export default function AdminUploadExam() {
     batch: "",
     duration: "",
     scheduled_date: "",
+    negative_marking: "",
   });
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -91,6 +92,7 @@ export default function AdminUploadExam() {
       formData.append("batch", exam.batch);
       formData.append("duration", exam.duration);
       formData.append("scheduled_date", exam.scheduled_date);
+      formData.append("negative_marking", exam.negative_marking || "0");
       formData.append("questions", JSON.stringify(parseResult.sections));
 
       const response = await fetch("/api/exams/upload-word-exam", {
@@ -133,7 +135,7 @@ export default function AdminUploadExam() {
             <p style={{ color: "#64748b", margin: "8px 0 20px" }}>
               {exam.name} — {saveResult?.total_questions || parseResult?.totalQuestions || 0} questions uploaded.
             </p>
-            <button className={styles.btn} onClick={() => { setStep("form"); setSaveResult(null); setExam({ name: "", type: "", batch: "", duration: "", scheduled_date: "" }); setFile(null); setParseResult(null); }}>
+            <button className={styles.btn} onClick={() => { setStep("form"); setSaveResult(null); setExam({ name: "", type: "", batch: "", duration: "", scheduled_date: "", negative_marking: "" }); setFile(null); setParseResult(null); }}>
               Upload Another Exam
             </button>
           </div>
@@ -194,6 +196,10 @@ export default function AdminUploadExam() {
               <div className={styles.formGroup}>
                 <label>Duration (minutes)</label>
                 <input className={styles.input} type="number" min="1" value={exam.duration} onChange={(e) => updateExamField("duration", e.target.value)} placeholder="60" disabled={loading} />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Negative Marking <span style={{ color: "#94a3b8", fontWeight: 400, fontSize: "0.75rem" }}>(per wrong answer, optional)</span></label>
+                <input className={styles.input} type="number" min="0" step="0.25" value={exam.negative_marking} onChange={(e) => updateExamField("negative_marking", e.target.value)} placeholder="e.g. 0.25 or 1" disabled={loading} />
               </div>
               <div className={`${styles.formGroup} ${styles.full}`}>
                 <label>Scheduled Date & Time</label>

@@ -80,7 +80,11 @@ async function handler(req, res) {
       .toArray();
 
     const correctSet = new Set(optionDocs.map(opt => opt._id.toString()));
-    const score = optionIds.reduce((sum, optionId) => sum + (correctSet.has(optionId) ? 1 : 0), 0);
+    const correctCount = optionIds.reduce((sum, optionId) => sum + (correctSet.has(optionId) ? 1 : 0), 0);
+    const attemptedCount = optionIds.length;
+    const wrongCount = attemptedCount - correctCount;
+    const negMark = exam.negative_marking || 0;
+    const score = correctCount - wrongCount * negMark;
 
     // Create submission
     await db.collection('student_exams').insertOne({

@@ -201,6 +201,7 @@ export default function AdminDashboard() {
                       <th>Student</th>
                       <th>Exam</th>
                       <th>Score</th>
+                      <th>Neg. Mark</th>
                       <th>Time Taken</th>
                       <th>Tab Switches</th>
                       <th>Status</th>
@@ -213,6 +214,9 @@ export default function AdminDashboard() {
                         <td><strong>{result.student_name}</strong></td>
                         <td>{result.exam_name}</td>
                         <td style={{ fontWeight: 700, color: "#16a34a" }}>{result.score}</td>
+                        <td style={{ fontSize: "0.82rem", color: result.negative_marking ? "#dc2626" : "#94a3b8" }}>
+                          {result.negative_marking ? `-${result.negative_marking}` : '—'}
+                        </td>
                         <td>{Math.floor((result.time_taken || 0) / 60)}m {(result.time_taken || 0) % 60}s</td>
                         <td>
                           {result.tab_switches > 0 ? (
