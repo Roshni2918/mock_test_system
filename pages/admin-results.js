@@ -76,6 +76,7 @@ export default function AdminResults() {
     { key: 'above10', label: 'Above 10', check: (s) => s >= 10 },
     { key: 'below10', label: 'Below 10', check: (s) => s <= 10 },
     { key: 'below5', label: 'Below 5', check: (s) => s <= 5 },
+    { key: 'top10', label: 'Top 10 Students', isSpecial: true },
   ];
 
   const handleExamFilter = (e) => {
@@ -99,9 +100,13 @@ export default function AdminResults() {
       filtered = filtered.filter(r => r.exam_type === selectedExamType);
     }
     if (scoreFilter) {
-      const range = scoreRanges.find(r => r.key === scoreFilter);
-      if (range) {
-        filtered = filtered.filter(r => range.check(r.score));
+      if (scoreFilter === 'top10') {
+        filtered = [...filtered].sort((a, b) => b.score - a.score).slice(0, 10);
+      } else {
+        const range = scoreRanges.find(r => r.key === scoreFilter);
+        if (range) {
+          filtered = filtered.filter(r => range.check(r.score));
+        }
       }
     }
     setFilteredResults(filtered);
@@ -201,7 +206,9 @@ export default function AdminResults() {
         <div className={styles.card} style={{ marginBottom: "20px", display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
           <span style={{ fontWeight: 600, fontSize: "0.85rem", color: "#475569" }}>Score:</span>
           {scoreRanges.map(range => {
-            const count = allResults.filter(r => range.check(r.score)).length;
+            const count = range.isSpecial
+              ? Math.min(10, allResults.length)
+              : allResults.filter(r => range.check(r.score)).length;
             return (
               <button
                 key={range.key}
