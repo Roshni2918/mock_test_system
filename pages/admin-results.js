@@ -265,6 +265,7 @@ export default function AdminResults() {
                   <th>Exam Type</th>
                   <th>Score</th>
                   <th>Time Taken</th>
+                  <th>Tab Switches</th>
                   <th>Status</th>
                   <th>Submitted At</th>
                   <th>Actions</th>
@@ -278,6 +279,20 @@ export default function AdminResults() {
                     <td>{result.exam_type ? <span className={`${styles.badge} ${styles.badgeInfo}`}>{result.exam_type}</span> : '—'}</td>
                     <td style={{ fontWeight: 700, color: result.score >= 5 ? "#16a34a" : "#dc2626" }}>{result.score}</td>
                     <td>{Math.round(result.time_taken / 60)} min</td>
+                    <td>
+                      {result.tab_switches > 0 ? (
+                        <span style={{
+                          color: result.tab_switches >= 3 ? '#dc2626' : '#ea580c',
+                          fontWeight: 700,
+                          fontSize: '0.85rem'
+                        }}>
+                          {result.tab_switches}
+                          {result.tab_switches >= 3 && ' ⚠️'}
+                        </span>
+                      ) : (
+                        <span style={{ color: '#94a3b8' }}>0</span>
+                      )}
+                    </td>
                     <td>
                       <span className={`${styles.badge} ${result.status === 'completed' ? styles.badgeSuccess : styles.badgeWarning}`}>
                         {result.status}
@@ -320,6 +335,7 @@ export default function AdminResults() {
               <p><strong>Student:</strong> {selectedResultDetails.result.student_name} ({selectedResultDetails.result.student_email})</p>
               <p><strong>Exam:</strong> {selectedResultDetails.result.exam_name} ({selectedResultDetails.result.exam_type} / {selectedResultDetails.result.exam_batch})</p>
               <p><strong>Score:</strong> {selectedResultDetails.result.score}</p>
+              <p><strong>Tab Switches:</strong> <span style={{ color: selectedResultDetails.result.tab_switches >= 3 ? '#dc2626' : '#475569', fontWeight: 700 }}>{selectedResultDetails.result.tab_switches || 0}</span></p>
               <p><strong>Submitted At:</strong> {new Date(selectedResultDetails.result.submitted_at).toLocaleString()}</p>
             </div>
 

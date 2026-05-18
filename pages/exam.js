@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../components/AuthContext";
 import styles from "../styles/Exam.module.css";
@@ -18,6 +18,8 @@ export default function ExamPage() {
   const [examStarted, setExamStarted] = useState(false); // FIXED: Add exam started flag
   const [reviewMap, setReviewMap] = useState({});
   const [loadError, setLoadError] = useState("");
+  const tabSwitchesRef = useRef(0);
+  const [tabSwitches, setTabSwitches] = useState(0);
 
   const parseResponseSafely = async (response) => {
     const responseText = await response.text();
@@ -49,6 +51,37 @@ export default function ExamPage() {
 
     loadExamData();
   }, [router.isReady, examId, user]);
+
+  // Disable copy/paste/context menu
+  useEffect(() => {
+    const prevent = (e) => { e.preventDefault(); return false; };
+    document.addEventListener('copy', prevent);
+    document.addEventListener('cut', prevent);
+    document.addEventListener('paste', prevent);
+    document.addEventListener('contextmenu', prevent);
+    return () => {
+      document.removeEventListener('copy', prevent);
+      document.removeEventListener('cut', prevent);
+      document.removeEventListener('paste', prevent);
+      document.removeEventListener('contextmenu', prevent);
+    };
+  }, []);
+
+  // Track tab switches, auto-submit after 3
+  useEffect(() => {
+    if (!examStarted || submitted) return;
+    const handleVisibility = () => {
+      if (document.hidden) {
+        tabSwitchesRef.current += 1;
+        setTabSwitches(tabSwitchesRef.current);
+        if (tabSwitchesRef.current >= 3) {
+          handleSubmit();
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [examStarted, submitted]);
 
   // FIXED: Only start timer when exam is actually started
   useEffect(() => {
@@ -153,7 +186,8 @@ export default function ExamPage() {
       const submissionData = {
         examId: examId,
         answers: answers || {},
-        time_taken: totalTime
+        time_taken: totalTime,
+        tab_switches: tabSwitchesRef.current
       };
       
       
@@ -249,6 +283,11 @@ export default function ExamPage() {
             <span className={styles.timerLabel}>Time Left</span>
             <span className={styles.timerValue}>{formatTime(timeLeft)}</span>
           </div>
+          {tabSwitches > 0 && (
+            <div style={{ color: tabSwitches >= 2 ? '#dc2626' : '#ea580c', fontSize: '0.82rem', fontWeight: 600, textAlign: 'right', marginTop: '4px' }}>
+              Tab switches: {tabSwitches}/3 {tabSwitches >= 2 ? '(Exam will auto-submit on next switch!)' : ''}
+            </div>
+          )}
         </div>
 
         <p className={styles.progressText}>

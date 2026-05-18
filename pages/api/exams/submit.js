@@ -8,7 +8,7 @@ async function handler(req, res) {
   }
 
   const user = req.user;
-  const { examId, answers, time_taken } = req.body;
+  const { examId, answers, time_taken, tab_switches } = req.body;
 
   if (!examId || !answers || typeof answers !== 'object') {
     return res.status(400).json({ message: 'Exam ID and answers are required' });
@@ -89,6 +89,7 @@ async function handler(req, res) {
       score,
       answers,
       time_taken: time_taken || 0,
+      tab_switches: tab_switches || 0,
       status: 'completed',
       submitted_at: new Date()
     });

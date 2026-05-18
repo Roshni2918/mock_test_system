@@ -202,6 +202,7 @@ export default function AdminDashboard() {
                       <th>Exam</th>
                       <th>Score</th>
                       <th>Time Taken</th>
+                      <th>Tab Switches</th>
                       <th>Status</th>
                       <th>Submitted At</th>
                     </tr>
@@ -213,6 +214,20 @@ export default function AdminDashboard() {
                         <td>{result.exam_name}</td>
                         <td style={{ fontWeight: 700, color: "#16a34a" }}>{result.score}</td>
                         <td>{Math.floor((result.time_taken || 0) / 60)}m {(result.time_taken || 0) % 60}s</td>
+                        <td>
+                          {result.tab_switches > 0 ? (
+                            <span style={{
+                              color: result.tab_switches >= 3 ? '#dc2626' : '#ea580c',
+                              fontWeight: 700,
+                              fontSize: '0.85rem'
+                            }}>
+                              {result.tab_switches}
+                              {result.tab_switches >= 3 && ' ⚠️'}
+                            </span>
+                          ) : (
+                            <span style={{ color: '#94a3b8' }}>0</span>
+                          )}
+                        </td>
                         <td>
                           <span className={`${styles.badge} ${result.status === "completed" ? styles.badgeSuccess : styles.badgeWarning}`}>
                             {result.status}

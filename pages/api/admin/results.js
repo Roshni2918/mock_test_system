@@ -32,6 +32,7 @@ async function handler(req, res) {
             score: 1,
             status: 1,
             time_taken: 1,
+            tab_switches: 1,
             submitted_at: 1,
             total_questions: { $arrayElemAt: ['$exam.total_questions', 0] },
             student_name: { $arrayElemAt: ['$student.name', 0] },
