@@ -53,25 +53,27 @@ export default function ExamPage() {
     loadExamData();
   }, [router.isReady, examId, user]);
 
-  // Disable copy/paste/context menu / PrintScreen
+  // Disable copy/paste/context menu / PrintScreen / text selection
   useEffect(() => {
     const prevent = (e) => { e.preventDefault(); return false; };
-    document.addEventListener('copy', prevent);
-    document.addEventListener('cut', prevent);
-    document.addEventListener('paste', prevent);
-    document.addEventListener('contextmenu', prevent);
+    document.addEventListener('copy', prevent, true);
+    document.addEventListener('cut', prevent, true);
+    document.addEventListener('paste', prevent, true);
+    document.addEventListener('contextmenu', prevent, true);
+    document.addEventListener('selectstart', prevent, true);
     const preventPrintScreen = (e) => {
       if (e.key === 'PrintScreen' || e.keyCode === 44) {
         e.preventDefault();
       }
     };
-    document.addEventListener('keydown', preventPrintScreen);
+    document.addEventListener('keydown', preventPrintScreen, true);
     return () => {
-      document.removeEventListener('copy', prevent);
-      document.removeEventListener('cut', prevent);
-      document.removeEventListener('paste', prevent);
-      document.removeEventListener('contextmenu', prevent);
-      document.removeEventListener('keydown', preventPrintScreen);
+      document.removeEventListener('copy', prevent, true);
+      document.removeEventListener('cut', prevent, true);
+      document.removeEventListener('paste', prevent, true);
+      document.removeEventListener('contextmenu', prevent, true);
+      document.removeEventListener('selectstart', prevent, true);
+      document.removeEventListener('keydown', preventPrintScreen, true);
     };
   }, []);
 
