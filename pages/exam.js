@@ -20,6 +20,7 @@ export default function ExamPage() {
   const [loadError, setLoadError] = useState("");
   const tabSwitchesRef = useRef(0);
   const [tabSwitches, setTabSwitches] = useState(0);
+  const [isFocused, setIsFocused] = useState(true);
 
   const parseResponseSafely = async (response) => {
     const responseText = await response.text();
@@ -52,20 +53,40 @@ export default function ExamPage() {
     loadExamData();
   }, [router.isReady, examId, user]);
 
-  // Disable copy/paste/context menu
+  // Disable copy/paste/context menu / PrintScreen
   useEffect(() => {
     const prevent = (e) => { e.preventDefault(); return false; };
     document.addEventListener('copy', prevent);
     document.addEventListener('cut', prevent);
     document.addEventListener('paste', prevent);
     document.addEventListener('contextmenu', prevent);
+    const preventPrintScreen = (e) => {
+      if (e.key === 'PrintScreen' || e.keyCode === 44) {
+        e.preventDefault();
+      }
+    };
+    document.addEventListener('keydown', preventPrintScreen);
     return () => {
       document.removeEventListener('copy', prevent);
       document.removeEventListener('cut', prevent);
       document.removeEventListener('paste', prevent);
       document.removeEventListener('contextmenu', prevent);
+      document.removeEventListener('keydown', preventPrintScreen);
     };
   }, []);
+
+  // Blur overlay when window loses focus (deters screenshot capture)
+  useEffect(() => {
+    if (!examStarted || submitted) return;
+    const onBlur = () => setIsFocused(false);
+    const onFocus = () => setIsFocused(true);
+    window.addEventListener('blur', onBlur);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      window.removeEventListener('blur', onBlur);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [examStarted, submitted]);
 
   // Track tab switches, auto-submit after 3
   useEffect(() => {
@@ -414,6 +435,16 @@ export default function ExamPage() {
           <p><span className={`${styles.legendDot} ${styles.statusNotAttempted}`}></span>Not Attempted</p>
         </div>
       </aside>
+
+      {!isFocused && examStarted && !submitted && (
+        <div className={styles.focusOverlay}>
+          <div className={styles.focusCard}>
+            <h2 className={styles.focusTitle}>You left the exam window</h2>
+            <p className={styles.focusText}>Click anywhere on this page to return.</p>
+            <p className={styles.focusWarning}>Your exam is still running. Leaving repeatedly may result in auto-submission.</p>
+          </div>
+        </div>
+      )}
 
       {submitted && (
         <div className={styles.submissionOverlay}>
